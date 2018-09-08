@@ -1,0 +1,96 @@
+
+
+:root {
+    --main-bg-color:     grey;
+    --main-border-color: darkgrey;
+ 
+    --title-color:       grey;
+    --title-left-color:  grey;
+    --title-right-color: white;
+
+    --node-bg-color: rgb(80, 120, 180);
+    --service-bg-color: rgb(80, 180, 120);
+}
+
+#container {
+    padding: 10px;
+    width:80%; height: 400px;
+    
+    border: 1px solid var(--main-border-color);
+}
+
+.box {
+    /* Added to enable draggable elements: */
+    position: absolute;
+
+    background: solid var(--main-bg-color);
+
+    height:80px; width: 80px;
+    border: 1px solid var(--main-border-color);
+}
+
+/* line_container used to contain 2 blocks on same line: */
+.row {  text-align:center;  display:inline;  }
+.col {  display:inline;  }
+
+.title-rounded {
+    border-radius: 25px;
+    background: var(--title-color);
+    color: white;
+
+    padding: 2px; 
+    /*width: max-content;*/
+    /* width: 180px;*/
+    height: 18px;
+}
+
+.title-left-rounded {
+    border-radius: 25px 0px 0px 25px;
+    background: var(--title-left-color);
+    color: white;
+
+    padding: 2px; 
+    height: 18px;
+}
+
+.title-right-rounded {
+    /*border-radius: 0px 25px 25px 0px;*/
+    background: var(--title-right-color);
+    color: black;
+
+    padding: 2px; 
+    height: 18px;
+}
+
+//.node-rounded {
+.node {
+    border-radius: 25px;
+
+    border-style: solid;
+    border-width: 5px;
+    border-color: var(--main-border-color);
+
+    background: var(--node-bg-color);
+    padding: 20px; 
+
+    /* Adapt size to content: */
+    /*width: 200px; height: 150px; */
+    width: max-content; height: max-content;
+
+}
+
+// .service-rounded {
+.service {
+    border-radius: 25px;
+
+    border-style: solid;
+    border-width: 5px;
+    border-color: var(--main-border-color);
+
+    background: var(--service-bg-color);
+    padding: 20px; 
+
+    /* Adapt size to content: */
+    /*width: 200px; height: 150px; */
+    width: max-content; height: max-content;
+}
