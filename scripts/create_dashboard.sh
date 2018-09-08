@@ -85,12 +85,12 @@ SERVICE_URL=http://${KUBENODE_IP}:${SERVICE_PORT}
 VISUALIZER_URL=http://${HOST_IP}:$VISUALIZER_PORT/static/index.html
 
 echo
-echo "Creating demo.html:"
+echo "Creating dashboard.html:"
 echo "    - Using TTYD_URL=$TTYD_URL"
 echo "    - Using SERVICE_URL=$SERVICE_URL"
 echo "    - Using VISUALIZER_URL=$VISUALIZER_URL"
 
-#sed -e "s/SERVICE_URL/$SERVICE_URL/g" -e "s/VISUALIZER_URL/$VISUALIZER_URL/g" demo.html.template > demo.html
+#sed -e "s/SERVICE_URL/$SERVICE_URL/g" -e "s/VISUALIZER_URL/$VISUALIZER_URL/g" dashboard.html.template > dashboard.html
 
 sed -e "s-TTYD_URL-$TTYD_URL-g" \
     -e "s-SERVICE_URL-$SERVICE_URL-g" \
@@ -98,7 +98,7 @@ sed -e "s-TTYD_URL-$TTYD_URL-g" \
     -e "s/KUBENODE_NAME/$KUBENODE_NAME/g" \
     -e "s-KUBENODE_IP-$KUBENODE_IP-g" \
     -e "s-NAMESPACE-$NAMESPACE-g" \
-    demo.html.template > demo.html
+    dashboard.html.template > dashboard.html
 
 
 ## TODO: give local and remote SERVICE_URLs if different:
