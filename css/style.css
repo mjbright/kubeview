@@ -1,42 +1,38 @@
 
 
-:root {
-    --main-bg-color:     grey;
-    --main-border-color: darkgrey;
- 
-    --title-color:       grey;
-    --title-left-color:  grey;
-    --title-right-color: white;
+/*.node-rounded { */
+.node {
+    border-width: 5px;
+    border-radius: 25px;
+    border-style: solid;
 
-    --node-bg-color: rgba(80, 120, 180, 0.1);
-    --node-fg-color: rgb(80, 120, 180);
+    border-color: var(--node-border-color);
 
-    --service-bg-color: rgb(180,180, 40);
-    --service-fg-color: white;
+    background: var(--node-bg-color);
+    color: var(--node-fg-color);
+    padding: 20px;
 
-    --replicaset-bg-color: rgb( 25, 25,232);
-    --replicaset-fg-color: white;
+    font-size: 1px;
 
-    --pod-bg-color: rgb(51,105,232);
-    --pod-fg-color: blue;
+    /* Adapt size to content: */
+    width: 200px; height: 150px;
+    /*width: max-content; height: max-content;*/
 
-    --container-bg-color: rgb(40,40,180); // dark blue
-    --container-fg-color: blue;
-}
+};
 
 /* line_container used to contain 2 blocks on same line: */
-.row {  text-align:center;  display:inline;  }
-.col {  display:inline;  }
+.row {  text-align:center;  display:inline;  };
+.col {  display:inline;  };
 
 .box {
     /* Added to enable draggable elements: */
     position: absolute;
 
-    // background: solid var(--main-bg-color);
+    background: solid var(--main-bg-color);
 
     height:80px; width: 80px;
     border: 1px solid var(--main-border-color);
-}
+};
 
 .title-rounded {
     border-radius: 25px;
@@ -47,7 +43,7 @@
     /*width: max-content;*/
     /* width: 180px;*/
     height: 18px;
-}
+};
 
 .title-left-rounded {
     border-radius: 25px 0px 0px 25px;
@@ -56,7 +52,7 @@
 
     padding: 2px;
     height: 18px;
-}
+};
 
 .title-right-rounded {
     /*border-radius: 0px 25px 25px 0px;*/
@@ -65,31 +61,14 @@
 
     padding: 2px;
     height: 18px;
-}
+};
 
 .wide {
   /*width: 150px;*/
   width: max-content;
-}
+};
 
-//.node-rounded {
-.node {
-    border-radius: 25px;
-
-    border-style: solid;
-    border-width: 5px;
-    border-color: var(--main-border-color);
-
-    background: var(--node-bg-color);
-    padding: 20px;
-
-    /* Adapt size to content: */
-    width: 200px; height: 150px;
-    //width: max-content; height: max-content;
-
-}
-
-// .service-rounded {
+/* .service-rounded  */
 .service {
     border-radius: 25px;
     border-style: solid;
@@ -104,25 +83,25 @@
     /* Adapt size to content: */
     /*width: 200px; height: 150px; */
     width: max-content; height: max-content;
-}
+};
 
 .pod {
   background-color: var(--pod-bg-color);
   color: var(--pod-fg-color);
   width: max-content;
-  // width: 150px;
-}
+  /* width: 150px; */
+};
 
 .container {
     padding: 10px;
     width: 30px; height: 30px;
-    //width:80%; height: 400px;
-    //border: 1px solid var(--main-border-color);
-}
+    /* width:80%; height: 400px; */
+    border: 1px solid var(--main-border-color);
+};
 
 .replicaset {
   background-color: var(--replicaset-bg-color);
   color: var(--replicaset-fg-color);
-}
+};
 
 

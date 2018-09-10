@@ -1,0 +1,25 @@
+
+:root {
+    --node-bg-color: rgba(80, 120, 180, 0.1);
+    --node-fg-color: rgb(80, 120, 180);
+
+    --main-bg-color:     grey;
+    --main-border-color: darkgrey;
+ 
+    --title-color:       grey;
+    --title-left-color:  grey;
+    --title-right-color: white;
+
+
+    --service-bg-color: rgb(180,180, 40);
+    --service-fg-color: white;
+
+    --replicaset-bg-color: rgb( 25, 25,232);
+    --replicaset-fg-color: white;
+
+    --pod-bg-color: rgb(51,105,232);
+    --pod-fg-color: blue;
+
+    --container-bg-color: rgb(40,40,180); /* dark blue */
+    --container-fg-color: blue;
+};
