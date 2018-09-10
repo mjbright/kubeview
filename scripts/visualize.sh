@@ -7,7 +7,7 @@ PORT=8002
 
 #kubectl proxy --www=/Users/mjb/src/git/brendandburns.gcp-live-k8s-visualizer --www-prefix=/my-mountpoint/ --api-prefix=/api/
 
-SRC_DIR=$(dirname $0)
+SRC_DIR=$(dirname $0)/..
 
 die() {
     echo "$0: die - $*" >&2
