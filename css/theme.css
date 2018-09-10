@@ -1,8 +1,5 @@
 
 :root {
-    --node-bg-color: rgba(80, 120, 180, 0.1);
-    --node-fg-color: rgb(80, 120, 180);
-
     --main-bg-color:     grey;
     --main-border-color: darkgrey;
  
@@ -10,9 +7,14 @@
     --title-left-color:  grey;
     --title-right-color: white;
 
+    --node-bg-color: rgba(80, 120, 180, 0.1);
+    --node-fg-color: rgb(80, 120, 180);
 
     --service-bg-color: rgb(180,180, 40);
     --service-fg-color: white;
+
+    --deploy-bg-color: rgb(150,150, 40);
+    --deploy-fg-color: white;
 
     --replicaset-bg-color: rgb( 25, 25,232);
     --replicaset-fg-color: white;
