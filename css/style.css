@@ -32,7 +32,7 @@
     /* Added to enable draggable elements: */
     position: absolute;
 
-    background: solid var(--main-bg-color);
+    // background: solid var(--main-bg-color);
 
     height:80px; width: 80px;
     border: 1px solid var(--main-border-color);
@@ -43,7 +43,7 @@
     background: var(--title-color);
     color: white;
 
-    padding: 2px; 
+    padding: 2px;
     /*width: max-content;*/
     /* width: 180px;*/
     height: 18px;
@@ -54,7 +54,7 @@
     background: var(--title-left-color);
     color: white;
 
-    padding: 2px; 
+    padding: 2px;
     height: 18px;
 }
 
@@ -63,16 +63,16 @@
     background: var(--title-right-color);
     color: black;
 
-    padding: 2px; 
+    padding: 2px;
     height: 18px;
 }
 
-//.node-rounded {
 .wide {
   /*width: 150px;*/
   width: max-content;
 }
 
+//.node-rounded {
 .node {
     border-radius: 25px;
 
@@ -81,11 +81,11 @@
     border-color: var(--main-border-color);
 
     background: var(--node-bg-color);
-    padding: 20px; 
+    padding: 20px;
 
     /* Adapt size to content: */
-    /*width: 200px; height: 150px; */
-    width: max-content; height: max-content;
+    width: 200px; height: 150px;
+    //width: max-content; height: max-content;
 
 }
 
@@ -96,7 +96,7 @@
     border-width: 5px;
     border-color: var(--main-border-color);
 
-    padding: 20px; 
+    padding: 20px;
 
     background-color: var(--service-bg-color);
     color: var(--service-fg-color);
