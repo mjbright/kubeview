@@ -1,4 +1,27 @@
 
+/* line_container used to contain 2 blocks on same line: */
+.row {  text-align:center;  display:inline;  }
+.col {  display:inline;  }
+
+
+/* .service-rounded  */
+.service {
+    border-radius: 25px;
+    border-style: solid;
+    border-width: 5px;
+    border-color: var(--main-border-color);
+
+    padding: 20px;
+
+    font-size: 10px;
+
+    background-color: var(--service-bg-color);
+    color: var(--service-fg-color);
+
+    /* Adapt size to content: */
+    /*width: 200px; height: 150px; */
+    width: max-content; height: max-content;
+}
 
 /*.node-rounded { */
 .node {
@@ -12,17 +35,12 @@
     color: var(--node-fg-color);
     padding: 20px;
 
-    font-size: 1px;
+    font-size: 20px;
 
     /* Adapt size to content: */
-    width: 200px; height: 150px;
-    /*width: max-content; height: max-content;*/
-
-};
-
-/* line_container used to contain 2 blocks on same line: */
-.row {  text-align:center;  display:inline;  };
-.col {  display:inline;  };
+    /* width: 200px; height: 150px; */
+    width: max-content; height: max-content;
+}
 
 .box {
     /* Added to enable draggable elements: */
@@ -32,7 +50,7 @@
 
     height:80px; width: 80px;
     border: 1px solid var(--main-border-color);
-};
+}
 
 .title-rounded {
     border-radius: 25px;
@@ -43,7 +61,7 @@
     /*width: max-content;*/
     /* width: 180px;*/
     height: 18px;
-};
+}
 
 .title-left-rounded {
     border-radius: 25px 0px 0px 25px;
@@ -52,7 +70,7 @@
 
     padding: 2px;
     height: 18px;
-};
+}
 
 .title-right-rounded {
     /*border-radius: 0px 25px 25px 0px;*/
@@ -61,47 +79,31 @@
 
     padding: 2px;
     height: 18px;
-};
+}
 
 .wide {
   /*width: 150px;*/
   width: max-content;
-};
+}
 
-/* .service-rounded  */
-.service {
-    border-radius: 25px;
-    border-style: solid;
-    border-width: 5px;
-    border-color: var(--main-border-color);
-
-    padding: 20px;
-
-    background-color: var(--service-bg-color);
-    color: var(--service-fg-color);
-
-    /* Adapt size to content: */
-    /*width: 200px; height: 150px; */
-    width: max-content; height: max-content;
-};
 
 .pod {
   background-color: var(--pod-bg-color);
   color: var(--pod-fg-color);
   width: max-content;
   /* width: 150px; */
-};
+}
 
 .container {
     padding: 10px;
     width: 30px; height: 30px;
     /* width:80%; height: 400px; */
     border: 1px solid var(--main-border-color);
-};
+}
 
 .replicaset {
   background-color: var(--replicaset-bg-color);
   color: var(--replicaset-fg-color);
-};
+}
 
 
