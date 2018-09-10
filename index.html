@@ -1,39 +1,22 @@
-<!DOCTYPE html>
 <html>
 <head>
     <!-- <link rel="stylesheet" type="text/css" href="css/livek8s.css"> -->
     <!-- <link rel="stylesheet" type="text/css" href="css/test.css"> -->
+    <link rel="stylesheet" type="text/css" href="css/theme.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
 
-    <div id="cluster">
-        <div id="NODE1"    class="box node">
-               <div class="title-rounded">
-                   <b>Type1</b> box: <i>"TITLE"</i>
-               </div>
-               line1
-               <hr/>
-               line2
-           </div>
-
-        <div id="SERVICE1" class="box service" style="margin-left:50px;">
-               <div class="">
-                       <div class="row title-left-rounded"> <b>Type2</b> box: </div>
-                       <div class="col title-right-rounded"> <i>"TITLE"</i> </div>
-                   </div>
-                   <div class="row">
-                       <div class="col title-left-rounded"> <b>Type2</b> box: </div>
-                       <div class="col title-right-rounded"> <i>"TITLE"</i> </div>
-                       <div class="col title-right-rounded"> "more text" </div>
-                   </div>
-               line1
-               <br/>
-               line2
-           </div>
-    </div>
+    <!-- TEST NODE:
+        <div class="node" id="testnode" > NODE1
+            <div class="service" id="testnode" > SERVICE1 </div>
+        </div>
+    -->
+    <div id="k8s_namespace" > </div> 
+    <div class="demo k8s_cluster" id="cluster"> </div>
 
     <!-- JavaScript -->
+    <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/jsplumb.min.js"></script>
     <script src="js/k8svisu.js"></script>
 
