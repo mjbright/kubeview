@@ -40,8 +40,12 @@ const connectionOverlays = [
 //-- Function definitions: ----------------------------------------------------
 
 const setPaths = (namespace) => {
-    // TODO: set API paths based on current namespace:
+    // set API paths based on current namespace:
 
+    services_path    = "/api/v1/namespaces/" + namespace + "/services";
+    pods_path        = "/api/v1/namespaces/" + namespace + "/pods";
+    deployments_path = "/apis/apps/v1/namespaces/" + namespace + "/deployments";
+    replicasets_path = "/apis/apps/v1/namespaces/" + namespace + "/replicasets";
 };
 
 const createElemDiv = (divclass, id, text, x, y) => {
