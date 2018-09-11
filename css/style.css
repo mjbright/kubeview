@@ -19,7 +19,8 @@
 
     /* Adapt size to content: */
     /* width: 200px; height: 150px; */
-    width: max-content; height: max-content;
+    /* width: max-content; height: max-content; */
+    width: 100%; height: max-content;
 }
 
 /* .service-rounded  */
