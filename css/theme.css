@@ -20,7 +20,7 @@
     --replicaset-fg-color: white;
 
     --pod-bg-color: rgb(51,105,232);
-    --pod-fg-color: blue;
+    --pod-fg-color: white;
 
     --container-bg-color: rgb(40,40,180); /* dark blue */
     --container-fg-color: blue;
