@@ -18,6 +18,9 @@ const debug=true;
 const debug_loops=1;
 const debug_timing=false;
 
+// Include type prefix in displayed element names, e.g. 'Service: <service-name>':
+const include_type=true;
+
 //-- Configuration definitions: -----------------------------------------------
 
 const getClusterState_timeout = 5000;
@@ -39,6 +42,8 @@ const connectionOverlays = [
 
 //-- Function definitions: ----------------------------------------------------
 
+const capitalize1stChar = (word) => { let tmp=word; return tmp.replace(/^\w/, c => c.toUpperCase()); };
+
 const setPaths = (namespace) => {
     // set API paths based on current namespace:
 
@@ -48,10 +53,15 @@ const setPaths = (namespace) => {
     replicasets_path = "/apis/apps/v1/namespaces/" + namespace + "/replicasets";
 };
 
-const createElemDiv = (divclass, id, text, x, y) => {
+const createElemDiv = (divclass, id, text, x, y, tooltip) => {
     // create string <div> element
 
-    const elemDiv=`<div class="${divclass}" id="'${id} style="left: '${x};top: ${y};" > ${text} </div>`;
+    let  type_info='';
+
+    if (include_type) {
+        type_info=capitalize1stChar(divclass)+': ';
+    }
+    const elemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="'${id} style="left: '${x};top: ${y};" > ${type_info}${text} </div>`;
 
     if (debug) { console.log(elemDiv); }
     return elemDiv;
@@ -176,34 +186,36 @@ const getClusterState = () => {
 
                  service.x = x; service.y = y;
                  if (service.metadata.name != 'kubernetes') {
-                     svcDiv = createElemDiv("service", service.metadata.uid, service.metadata.name, x, y);
+                     tooltip=`TODO: ${service.metadata.uid} - '${service.metadata.name}<br/>${service.metadata.labels}`;
+                     svcDiv = createElemDiv("service", service.metadata.uid, service.metadata.name, x, y, tooltip);
                      services_info+=svcDiv;
                      console.log(`service[${index}]: ${service.metadata.name}`);
                  }
              } );
 
-            deploys_info='';
-            deployments.forEach( (deployment, index) => {
-                let y=100+100*index;
-                let x=110; //100*index;
+             deploys_info='';
+             deployments.forEach( (deployment, index) => {
+                 let y=100+100*index;
+                 let x=110; //100*index;
  
-                if (deployment.metadata.name != 'kubernetes') {
-                    services.forEach( service => { 
-                        if (service.metadata.name == deployment.metadata.name) {
-                            x = service.x + 180; deployment.x = x;
-                            y = service.y + 50;  deployment.y = y;
-                            //!! no break;
-                        }
-                    })
+                 if (deployment.metadata.name != 'kubernetes') {
+                     services.forEach( service => { 
+                         if (service.metadata.name == deployment.metadata.name) {
+                             x = service.x + 180; deployment.x = x;
+                             y = service.y + 50;  deployment.y = y;
+                             //!! no break;
+                         }
+                     })
     
-                    replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
-                    deploymentText=`Deploy: ${deployment.metadata.name} <br/> ${replicas} replicas`;
-                    deploymentDiv = createElemDiv("deployment", deployment.metadata.uid, deploymentText, x, y);
+                     replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
+                     deploymentText=`${deployment.metadata.name} <br/> ${replicas} replicas`;
+                     tooltip=`TODO: ${deployment.metadata.uid} - '${deployment.metadata.name}`;
+                     deploymentDiv = createElemDiv("deployment", deployment.metadata.uid, deploymentText, x, y, tooltip);
 
-                    deploys_info+=deploymentDiv;
-                }
-               // console.log(`deployment[${index}]: ${deployment.metadata.name}`);
-            } );
+                     deploys_info+=deploymentDiv;
+                 }
+                // console.log(`deployment[${index}]: ${deployment.metadata.name}`);
+             } );
 
         replicasets_info='';
         lastreplicaset=0;
@@ -223,9 +235,8 @@ const getClusterState = () => {
                 })
     
                 //replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
-                replicasetDiv='<div class="replicaset" id="' + replicaset.metadata.uid + '" style="left: ' + x + '; top: ' + y + '"> ' + 'RepSet: ' + replicaset.metadata.name; // + //'<br/>' + //replicas + ' replicas</div>';
-                replicasetText=`RepSet: ${replicaset.metadata.name}`;  // + //'<br/>' + //replicas + ' replicas</div>';
-                replicasetDiv=createElemDiv("replicaset", replicaset.metadata.uid, replicasetText, x, y);
+                replicasetText=`${replicaset.metadata.name}`;  // + //'<br/>' + //replicas + ' replicas</div>';
+                replicasetDiv=createElemDiv("replicaset", replicaset.metadata.uid, replicasetText, x, y, tooltip);
 
                 replicasets_info+=replicasetDiv;
                 //console.log(replicaset);
@@ -243,7 +254,8 @@ const getClusterState = () => {
                 podText = pod.metadata.name;
                 x += 100;
             
-                podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y);
+                tooltip=`TODO: ${pod.metadata.uid} - '${pod.metadata.name}`;
+                podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip);
                 pods_info += podDiv;
             });
         }
@@ -285,7 +297,8 @@ const getClusterState = () => {
 		}
                 nodeText += '</div>';
 
-                nodeDiv = createElemDiv("node", node.metadata.uid, nodeText, x, y);
+                tooltip=`TODO: ${node.metadata.uid} - '${node.metadata.name}`;
+                nodeDiv = createElemDiv("node", node.metadata.uid, nodeText, x, y, tooltip);
 
                 ALL_info += nodeDiv;
                 // console.log(`node[${index}]: ${node.metadata.name}`);
