@@ -1,51 +1,93 @@
 
-var common = {
-    connector: ["Straight"],
-    anchor: ["Left", "Right"],
-    endpoint:"Dot",
+//-- Variable definitions: ----------------------------------------------------
 
-    paintStyle:{ stroke:"lightgray", strokeWidth:3,  },
-    endpointStyle:{ fill:"lightgray", outlineStroke:"darkgray", outlineWidth:10 },
+let loop=0;
+let nodes = [];
+let namespaces = [];
+let services = [];
+let deployments = [];
+let replicasets = [];
 
-    overlays:[ ["Arrow" , { width:12, length:12, location:0.67 }] ],
+let pods = [];
+
+//-- Constant definitions: ----------------------------------------------------
+
+const debug=true;
+//const debug_loops=1;
+//const debug_loops=0;
+const debug_loops=1;
+const debug_timing=false;
+
+//-- Configuration definitions: -----------------------------------------------
+
+const getClusterState_timeout = 5000;
+
+let namespace="default";
+
+const nodes_path="/api/v1/nodes";
+const namespaces_path="/api/v1/namespaces";
+
+let ingresscontrollers_path=undefined;
+let services_path=undefined;
+let deployments_path=undefined;
+let replicasets_path=undefined;
+let pods_path=undefined;
+
+const connectionOverlays = [
+    // to complete
+];
+
+//-- Function definitions: ----------------------------------------------------
+
+const setPaths = (namespace) => {
+    // TODO: set API paths based on current namespace:
+
 };
 
-const start = () => {
-    jsPlumb.connect({
-        source:"NODE1",
-        target:"SERVICE1",
-        endpoint:"Rectangle",
+const createElemDiv = (divclass, id, text, x, y) => {
+    // TODO: create string <div> element
 
-        /*connector: ["Straight"],
-        anchor: ["Left", "Right"],
-        endpoint:"Dot",*/
-        
-}, common);
+};
 
-    jsPlumb.draggable("NODE1");
-    jsPlumb.draggable("SERVICE1");
+const detectChanges = () => {
+    // TODO: detect changes in API results ...
 
-    /* Add an endpoint on the bottom-side of the left hand item: */
-    jsPlumb.addEndpoint("NODE1", {
-        anchors:["Bottom"]
+    return true;
+};
+
+const getClusterState = () => {
+    // TODO: interrogate API for clusterState
+
+};
+
+const initialLoad = () => {
+    // Initial jsPlumb load
+
+    if (debug) { console.log("LOAD @ " + jQuery.now()); }
+    jsPlumb.reset();
+
+    let instance = jsPlumb.getInstance({
+        ConnectionOverlays: connectionOverlays,
+        Container: "k8s_cluster",
     });
 
-    jsPlumb.addEndpoint("SERVICE1", {
-        /* Endpoint-Position */
-        anchor:"Top",
-     
-        /* Endpoint-Style */
-        endpoint:"Rectangle",
-        paintStyle:{ fill:"white", outlineStroke:"blue", strokeWidth:3 },
-        hoverPaintStyle:{ outlineStroke:"lightblue" },
-     
-        /* Connector(Line)-Style */
-        connectorStyle:{ outlineStroke:"green", strokeWidth:1 },
-        connectorHoverStyle:{ strokeWidth:2 },
-        common});
+    jsPlumb.fire("jsPlumbStarted", instance);
+
+    getClusterState();
+};
+
+const redrawAll = (info) => {
+    // When changes are detected, redraw cluster:
+
+    $("#cluster").empty();
+    if (debug) { console.log("redrawAll @ " + jQuery.now()); }
+
+    $('#cluster').append(info);
 };
 
 
+//-- Main: --------------------------------------------------------------------
 
-jsPlumb.ready(start);
+// your jsPlumb related init code goes here
+jsPlumb.ready( initialLoad );
 
