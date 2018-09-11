@@ -64,7 +64,84 @@ const detectChanges = () => {
 };
 
 const getClusterState = () => {
-    // TODO: interrogate API for clusterState
+    // interrogate API for clusterState
+
+    let def = $.Deferred();
+
+    // EMPTY OUT WHOLE cluster canvas: TODO - do this intelligently
+    // Don't redisplay at all if no changes seen via APIs.
+    $('#cluster').empty();
+
+    setPaths(namespace);
+
+    const firstReq=jQuery.now();
+    let requests = [ ]
+
+    const getnodes=true;
+    const getns=true;
+    const getservices=true;
+    const getdeploys=true;
+    const getrs=true;
+    const getpods=true;
+
+    // TODO: dependent on getnodes, etc? ...
+    /*nodes = [];
+    namespaces = [];
+    deployments = [];
+    replicasets = [];
+    pods = [];
+    services = [];*/
+ 
+    if ( getnodes ) {
+        const nodesReq = $.getJSON(nodes_path, (obj) => {
+            if (obj.items == undefined) { return; }
+            nodes = obj.items; nodes.forEach( (item) => { item.kind='node';} ) });
+        requests.push(nodesReq);
+    }
+    if ( getns ) {
+        const namespacesReq = $.getJSON(namespaces_path, (obj) => {
+            if (obj.items == undefined) { return; }
+            namespaces=obj.items; namespaces.forEach( (item) => { item.kind='namespace';} ) });
+        requests.push(namespacesReq);
+    }
+    if ( getservices ) {
+        const servicesReq   = $.getJSON(services_path,   (obj) => {
+            if (obj.items == undefined) { return; }
+            services=obj.items; services.forEach( (item) => { item.kind='service';} ) });
+        requests.push(servicesReq);
+    }
+    if ( getdeploys ) {
+        const deploymentsReq   = $.getJSON(deployments_path,   (obj) => {
+            if (obj.items == undefined) { return; }
+            deployments=obj.items; deployments.forEach( (item) => { item.kind='deployment';} ) });
+        requests.push(deploymentsReq);
+    }
+    if ( getrs ) {
+        const replicasetsReq   = $.getJSON(replicasets_path,   (obj) => {
+            if (obj.items == undefined) { return; }
+            replicasets=obj.items; replicasets.forEach( (item) => { item.kind='replicaset';} ) });
+        requests.push(replicasetsReq);
+    }
+    if ( getpods ) {
+        const podsReq   = $.getJSON(pods_path,   (obj) => {
+            if (obj.items == undefined) { return; }
+            pods=obj.items; pods.forEach( (item) => { item.kind='pod';} ) });
+        requests.push(podsReq);
+    }
+
+    const lastReq=jQuery.now();
+
+    $.when.apply( $, requests ).done( () => {
+            // TODO: DETECT CHANGES, only do empty+redraw when changes occur
+            // TODO: Don't check nodes, namespaces at each iteration
+            // TODO: Determine nodes first, determine number of entries (Service/Deploy/ReplicaSets/Pods) to determine space needed
+            // TODO: Correct dependency between different entities (Service/Deploy/ReplicaSets/Pods)
+            // TODO: Refactor this code
+
+            const doneReq=jQuery.now();
+            def.resolve();
+
+    });
 
 };
 
