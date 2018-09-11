@@ -126,3 +126,71 @@
 }
 
 
+/* ------------------------ Tooltips ------------------------ */
+
+a.tooltip {
+    position: relative;
+}
+
+a.tooltip::before {
+    content: attr(data-tip) ;
+    font-family: arial, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    position:absolute;
+    z-index: 999;
+    white-space:nowrap;
+    bottom:9999px;
+    left: 50%;
+    background:#000;
+    color:#e0e0e0;
+    padding:0px 7px;
+    line-height: 24px;
+    height: 24px;
+
+    opacity: 0;
+    -webkit-transition:opacity 0.4s ease-out;
+    -moz-transition:opacity 0.4s ease-out;
+    -o-transition:opacity 0.4s ease-out;
+    transition:opacity 0.4s ease-out;
+}    
+
+a.tooltip:hover::before    {
+    opacity: 1;
+    bottom:-35px;
+}
+
+div.tooltip {
+    position: relative;
+}
+
+div.tooltip::before {
+    content: attr(data-tip) ;
+    font-family: arial, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    position:absolute;
+    z-index: 999;
+    white-space:nowrap;
+    bottom:9999px;
+    left: 50%;
+    background:#000;
+    color:#e0e0e0;
+    padding:0px 7px;
+    line-height: 24px;
+    height: 24px;
+
+    opacity: 0;
+    -webkit-transition:opacity 0.4s ease-out;
+    -moz-transition:opacity 0.4s ease-out;
+    -o-transition:opacity 0.4s ease-out;
+    transition:opacity 0.4s ease-out;
+}    
+
+div.tooltip:hover::before    {
+    opacity: 1;
+    bottom:-35px;
+}
+
+
+

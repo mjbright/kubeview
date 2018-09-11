@@ -42,8 +42,21 @@ while [ ! -z "$1" ];do
     shift
 done
 
+add_source_tooltip() {
+   SOURCE=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
+   [ -z "$SOURCE" ] && SOURCE=$PWD
+
+   TOOLTIP="Sourced from $SOURCE"
+   #echo "SOURCE='$SOURCE'"
+   #echo "TOOLTIP='$TOOLTIP'"
+   sed -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" index.html.template > index.html
+}
+
+add_source_tooltip
+
 #kubectl proxy $OPTS  --www=$SRC_DIR --www-prefix=/ --api-prefix=/api/ --port $PORT
 set -x
 kubectl proxy $OPTS  --www=$SRC_DIR --www-prefix=/static/ --port $PORT
 set +x
+
 

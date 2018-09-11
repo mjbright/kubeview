@@ -13,8 +13,8 @@
         </div>
     -->
 
-    <!-- <a href='#' data-tip='Sourced from https://github.com/mjbright/k8s-visu' class='tooltip' >Source</a> -->
-    <div style='text-align: right;' data-tip='Sourced from https://github.com/mjbright/k8s-visu' class='tooltip' >Source</div>
+    <!-- <a href='#' data-tip='TOOLTIP' class='tooltip' >Source</a> -->
+    <div style='text-align: right;' data-tip='TOOLTIP' class='tooltip' >Source</div>
 
     <div id="k8s_namespace" > </div> 
     <div class="demo k8s_cluster" id="cluster"> </div>
