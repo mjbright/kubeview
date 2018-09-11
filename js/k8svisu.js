@@ -141,6 +141,157 @@ const getClusterState = () => {
             const doneReq=jQuery.now();
             def.resolve();
 
+            const resolvedReq=jQuery.now();
+
+            if (debug_timing) {
+                console.log("1st req at: " + firstReq);
+                console.log("last req at: " + lastReq + " after " + (lastReq-firstReq) + " msec");
+                console.log("done     at: " + doneReq + " after " + (doneReq-firstReq) + " msec");
+                console.log("resolved at: " + resolvedReq + " after " + (resolvedReq-firstReq) + " msec");
+            }
+            //----- Build up namespace dropdown menu:
+            let namespaceList=[];
+            let nsMenu='<select class="col dropbtn" id="nsmenu" >';
+            namespaces.forEach( (namespace, index) => {
+                //console.log(`namespace[${index}]: ${namespace.metadata.name}`);
+                nsMenu += '<option value="' + namespace.metadata.name + '">' + namespace.metadata.name + '</option>';
+                namespaceList.push(namespace.metadata.name);
+            } );
+            nsMenu += '</select>';
+
+            // TODO: Add radio-button - show kubernetes entities?
+            // TODO: Menu -> set namespace
+            namespace_info='<div><div class="row" ><b>Namespace:</b> </div> <div class="col" >' + nsMenu + '</div> </div>'; // + namespace; 
+            $('#k8s_namespace').empty();
+            $('#k8s_namespace').append(namespace_info);
+            
+            // TODO: Calculate positions relative to nodes, last line of node:
+            // - calculate in advance, number of nodes and number of entities in each node (whence height of node)
+            // - place service/deploy/replicaset on Master node
+            // - place pods on appropriat e worker node
+            services_info='';
+            services.forEach( (service, index) => {
+                 let y=100+100*index;
+                 let x=10; //100*index;
+
+                 service.x = x; service.y = y;
+                 if (service.metadata.name != 'kubernetes') {
+                     svcDiv = createElemDiv("service", service.metadata.uid, service.metadata.name, x, y);
+                     services_info+=svcDiv;
+                     console.log(`service[${index}]: ${service.metadata.name}`);
+                 }
+             } );
+
+            deploys_info='';
+            deployments.forEach( (deployment, index) => {
+                let y=100+100*index;
+                let x=110; //100*index;
+ 
+                if (deployment.metadata.name != 'kubernetes') {
+                    services.forEach( service => { 
+                        if (service.metadata.name == deployment.metadata.name) {
+                            x = service.x + 180; deployment.x = x;
+                            y = service.y + 50;  deployment.y = y;
+                            //!! no break;
+                        }
+                    })
+    
+                    replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
+                    deploymentText=`Deploy: ${deployment.metadata.name} <br/> ${replicas} replicas`;
+                    deploymentDiv = createElemDiv("deployment", deployment.metadata.uid, deploymentText, x, y);
+
+                    deploys_info+=deploymentDiv;
+                }
+               // console.log(`deployment[${index}]: ${deployment.metadata.name}`);
+            } );
+
+        replicasets_info='';
+        lastreplicaset=0;
+        replicasets.forEach( (replicaset, index) => {
+            let y=100+100*index;
+            let x=110; //100*index;
+
+            lastreplicaset=replicaset;
+ 
+            if (replicaset.metadata.name != 'kubernetes') {
+                deployments.forEach( deployment => { 
+                    if (deployment.metadata.name == replicaset.metadata.name) {
+                        x = deployment.x + 180; replicaset.x = x;
+                        y = deployment.y + 50;  replicaset.y = y;
+                        //!! no break;
+                    }
+                })
+    
+                //replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
+                replicasetDiv='<div class="replicaset" id="' + replicaset.metadata.uid + '" style="left: ' + x + '; top: ' + y + '"> ' + 'RepSet: ' + replicaset.metadata.name; // + //'<br/>' + //replicas + ' replicas</div>';
+                replicasetText=`RepSet: ${replicaset.metadata.name}`;  // + //'<br/>' + //replicas + ' replicas</div>';
+                replicasetDiv=createElemDiv("replicaset", replicaset.metadata.uid, replicasetText, x, y);
+
+                replicasets_info+=replicasetDiv;
+                //console.log(replicaset);
+            }
+           // console.log(`replicaset[${index}]: ${replicaset.metadata.name}`);
+        } );
+
+        pods_info=''
+        x = 0;
+
+        if (lastreplicaset) {
+            y = lastreplicaset.y+100;
+            pods.forEach( (pod, index) => {
+                console.log(`pod[${index}]: ${pod.metadata.name}`);
+                podText = pod.metadata.name;
+                x += 100;
+            
+                podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y);
+                pods_info += podDiv;
+            });
+        }
+
+            let masterIdx=undefined;
+            nodes.forEach( (node, index)      => {
+		if ('node-role.kubernetes.io/master' in node.metadata.labels) {
+                    name = '*' + node.metadata.name;
+		    role = 'master';
+                    masterIdx=index;
+                    master=nodes[index];
+                    //console.log("MASTER=" + index);
+		}
+            });
+
+            if (masterIdx == undefined) {
+                console.log("Failed to detect Master node");
+            }
+            console.log(`MASTER=node[${masterIdx}]='${master.metadata.name}'`);
+
+            ALL_info=''
+            nodes.forEach( (node, index)      => {
+                //let y=1000*index;
+                let y=0*index;
+                let x=0; //100*index;
+
+                name = node.metadata.name;
+		role = 'worker';
+		if ('node-role.kubernetes.io/master' in node.metadata.labels) {
+                    name = '*' + node.metadata.name;
+		    role = 'master';
+		}
+
+                nodeText='<div><b>Node:</b> <i>' + name + '</i>';
+		if (role == 'master') {
+                     nodeText += services_info + deploys_info + replicasets_info + pods_info;
+		} else {
+                     nodeText += pods_info;
+		}
+                nodeText += '</div>';
+
+                nodeDiv = createElemDiv("node", node.metadata.uid, nodeText, x, y);
+
+                ALL_info += nodeDiv;
+                // console.log(`node[${index}]: ${node.metadata.name}`);
+            } );
+
+
             if (debug_loops != 1) {
                 setTimeout(reload, getClusterState_timeout);
             }
