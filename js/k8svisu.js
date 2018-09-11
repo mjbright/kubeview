@@ -49,8 +49,12 @@ const setPaths = (namespace) => {
 };
 
 const createElemDiv = (divclass, id, text, x, y) => {
-    // TODO: create string <div> element
+    // create string <div> element
 
+    const elemDiv=`<div class="${divclass}" id="'${id} style="left: '${x};top: ${y};" > ${text} </div>`;
+
+    if (debug) { console.log(elemDiv); }
+    return elemDiv;
 };
 
 const detectChanges = () => {
