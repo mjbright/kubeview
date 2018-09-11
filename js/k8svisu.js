@@ -141,6 +141,15 @@ const getClusterState = () => {
             const doneReq=jQuery.now();
             def.resolve();
 
+            if (debug_loops != 1) {
+                setTimeout(reload, getClusterState_timeout);
+            }
+
+            // Redraw cluster only when changes are detected:
+            if (detectChanges()) {
+                redrawAll(ALL_info);
+            }
+
     });
 
 };
