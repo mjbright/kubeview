@@ -276,7 +276,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
     // TODO: Add radio-button - show kubernetes entities?
     // TODO: Menu -> set namespace
-    namespace_info='<div><div class="row" ><b>Namespace:</b> </div> <div class="col" >' + nsMenu + '</div> </div>'; // + namespace;
+    namespace_info='<div><div class="row" ><b>Namespace:</b> </div> <div class="col" >' + nsMenu + '</div> ' + sourceURL + ' </div>'; // + namespace;
     $('#k8s_namespace').empty();
     $('#k8s_namespace').append(namespace_info);
 
