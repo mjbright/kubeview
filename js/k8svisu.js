@@ -225,6 +225,48 @@ const buildNamespaceMenu = (namespaces) => {
     return nsMenu;
 };
 
+
+const getMasterIndex = (nodes) => {
+    let masterIdx=undefined;
+
+    nodes.forEach( (node, index)      => {
+	if ('node-role.kubernetes.io/master' in node.metadata.labels) {
+	    name = '*' + node.metadata.name;
+	    role = 'master';
+	    masterIdx=index;
+	    master=nodes[index];
+	    //console.log("MASTER=" + index);
+	}
+    });
+
+    if (masterIdx == undefined) {
+	console.log("Failed to detect Master node");
+    }
+    // console.log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
+
+    return [masterIdx, master.metadata.name];
+};
+
+const getNodeIndex = (nodes, nodeName) => {
+    var nodeIndex = -1;
+
+    nodes.forEach( (node, index) => {
+	if (node.metadata.name == nodeName) {
+	    //console.log(`${node.metadata.name} == ${nodeName}`);
+            nodeIndex = index;
+        }
+	//console.log(`${node.metadata.name} != ${nodeName}`);
+    });
+
+    //console.log(nodeIndex);
+    if (nodeIndex != -1) {
+	return nodeIndex;
+    }
+
+    die(`Failed to find node <${nodeName}> in list`);
+    return -1;
+};
+
 const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
 
     //----- Build up namespace dropdown menu:
