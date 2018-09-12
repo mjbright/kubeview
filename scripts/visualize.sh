@@ -43,13 +43,19 @@ while [ ! -z "$1" ];do
 done
 
 add_source_tooltip() {
-   SOURCE=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
-   [ -z "$SOURCE" ] && SOURCE=$PWD
+   SOURCEURL=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
+   [ -z "$SOURCEURL" ] && SOURCEURL=$PWD
 
-   TOOLTIP="Sourced from $SOURCE"
-   #echo "SOURCE='$SOURCE'"
+   TOOLTIP="Sourced from $SOURCEURL"
+   #echo "SOURCEURL='$SOURCEURL'"
    #echo "TOOLTIP='$TOOLTIP'"
-   sed -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" index.html.template > index.html
+   sed \
+       -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" \
+       -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
+		   index.html.template > index.html
+
+   ls -al index.html
+   [ ! -s index.html ] && die "Failed to create index.html from template"
 }
 
 add_source_tooltip
