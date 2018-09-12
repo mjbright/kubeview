@@ -73,6 +73,22 @@ const detectChanges = () => {
     return true;
 };
 
+const getLabelsAnnotations = (object) => {
+    let retStr='';
+
+    // console.log( $.param( object.metadata.labels, true) );
+
+    if (object.metadata.labels) {
+        retStr += '\n    Labels: ' + $.param( object.metadata.labels, true)
+    };
+
+    if (object.metadata.annotations) {
+        retStr += '\n    Annotations: ' + $.param( object.metadata.annotations, true)
+    };
+
+    return retStr;
+}
+
 const getClusterState = () => {
     // interrogate API for clusterState
 
@@ -186,7 +202,8 @@ const getClusterState = () => {
 
                  service.x = x; service.y = y;
                  if (service.metadata.name != 'kubernetes') {
-                     tooltip=`TODO: ${service.metadata.uid} - '${service.metadata.name}<br/>${service.metadata.labels}`;
+                     labels=getLabelsAnnotations(service);
+                     tooltip=`${service.metadata.uid} - ${service.metadata.name}  ${labels}`;
                      svcDiv = createElemDiv("service", service.metadata.uid, service.metadata.name, x, y, tooltip);
                      services_info+=svcDiv;
                      console.log(`service[${index}]: ${service.metadata.name}`);
@@ -209,7 +226,7 @@ const getClusterState = () => {
     
                      replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
                      deploymentText=`${deployment.metadata.name} <br/> ${replicas} replicas`;
-                     tooltip=`TODO: ${deployment.metadata.uid} - '${deployment.metadata.name}`;
+                     tooltip=`${deployment.metadata.uid} - '${deployment.metadata.name}`;
                      deploymentDiv = createElemDiv("deployment", deployment.metadata.uid, deploymentText, x, y, tooltip);
 
                      deploys_info+=deploymentDiv;
@@ -254,7 +271,7 @@ const getClusterState = () => {
                 podText = pod.metadata.name;
                 x += 100;
             
-                tooltip=`TODO: ${pod.metadata.uid} - '${pod.metadata.name}`;
+                tooltip=`${pod.metadata.uid} - '${pod.metadata.name}`;
                 podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip);
                 pods_info += podDiv;
             });
@@ -289,15 +306,14 @@ const getClusterState = () => {
 		    role = 'master';
 		}
 
-                nodeText='<div><b>Node:</b> <i>' + name + '</i>';
+                nodeText='<i>' + name + '</i>';
 		if (role == 'master') {
                      nodeText += services_info + deploys_info + replicasets_info + pods_info;
 		} else {
                      nodeText += pods_info;
 		}
-                nodeText += '</div>';
 
-                tooltip=`TODO: ${node.metadata.uid} - '${node.metadata.name}`;
+                tooltip=`${node.metadata.uid} - '${node.metadata.name}`;
                 nodeDiv = createElemDiv("node", node.metadata.uid, nodeText, x, y, tooltip);
 
                 ALL_info += nodeDiv;
