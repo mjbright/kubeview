@@ -43,6 +43,11 @@ const connectionOverlays = [
 
 const capitalize1stChar = (word) => { let tmp=word; return tmp.replace(/^\w/, c => c.toUpperCase()); };
 
+const die = (msg) => {
+    console.log('die: ' + msg);
+    throw '';
+};
+
 const setPaths = (namespace) => {
     // set API paths based on current namespace:
 
