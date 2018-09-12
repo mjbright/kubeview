@@ -24,7 +24,9 @@
     border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
+    position: absolute;
     padding: 5px;
+    margin: 5px;
     font-size: 20px;
 
     background-color: var(--service-bg-color);
@@ -39,7 +41,9 @@
     border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
+    position: absolute;
     padding: 5px;
+    margin: 5px;
     font-size: 20px;
 
     background-color: var(--deploy-bg-color);
@@ -55,6 +59,11 @@
     border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
+    position: absolute;
+    padding: 5px;
+    margin: 5px;
+    font-size: 20px;
+
     background-color: var(--replicaset-bg-color);
     color: var(--replicaset-fg-color);
     width: max-content; height: max-content;
@@ -63,6 +72,11 @@
 .pod {
     border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
+
+    position: absolute;
+    padding: 5px;
+    margin: 5px;
+    font-size: 20px;
 
     background-color: var(--pod-bg-color) ;
     color: var(--pod-fg-color) ;
