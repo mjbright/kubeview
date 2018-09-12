@@ -279,12 +279,36 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
     namespace_info='<div><div class="row" ><b>Namespace:</b> </div> <div class="col" >' + nsMenu + '</div> </div>'; // + namespace; 
     $('#k8s_namespace').empty();
     $('#k8s_namespace').append(namespace_info);
+
+    var ALL_info=''
+    var nodeDivText=[];
+
+    // Determine which is the (only) Master node:
+    const retList = getMasterIndex(nodes);
+    let masterIdx = retList[0];
+    let masterNode = retList[1];
+    console.log(`MASTER=node[${masterIdx}]=${masterNode}'`);
+
+    nodes.forEach( (node, index)      => {
+	//let y=1000*index;
+	let y=0*index;
+	let x=0; //100*index;
+
+        nodeDivText[index]='';
+
+	name = node.metadata.name;
+	role = 'worker';
+	if (index == masterIdx) {
+	    name = '*' + node.metadata.name;
+	    role = 'master';
+	}
+
+	nodeDivText[index]+='<i>' + name + '</i>';
+	tooltip=`${node.metadata.uid} - ${node.metadata.name}`;
+	nodeDivText[index] = startElemDiv("node", node.metadata.uid, nodeDivText[index], x, y, tooltip);
+    });
+
     
-    // TODO: Calculate positions relative to nodes, last line of node:
-    // - calculate in advance, number of nodes and number of entities in each node (whence height of node)
-    // - place service/deploy/replicaset on Master node
-    // - place pods on appropriat e worker node
-    services_info='';
     services.forEach( (service, index) => {
 	 let y=100+100*index;
 	 let x=10; //100*index;
