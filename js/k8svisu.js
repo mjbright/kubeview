@@ -14,7 +14,7 @@ let pods = [];
 const debug=true;
 //const debug_loops=1;
 //const debug_loops=0;
-const debug_loops=1;
+var debug_loops=1;
 const debug_timing=false;
 
 // Include type prefix in displayed element names, e.g. 'Service: <service-name>':
@@ -24,7 +24,7 @@ const include_type=true;
 
 const getClusterState_timeout = 5000;
 
-let namespace="default";
+var namespace="default";
 
 const nodes_path="/api/v1/nodes";
 const namespaces_path="/api/v1/namespaces";
@@ -60,7 +60,7 @@ const createElemDiv = (divclass, id, text, x, y, tooltip) => {
     if (include_type) {
         type_info=capitalize1stChar(divclass)+': ';
     }
-    const elemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="'${id} style="left: '${x};top: ${y};" > ${type_info}${text} </div>`;
+    const elemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id} style="left: ${x};top: ${y};" > ${type_info}${text} </div>`;
 
     if (debug) { console.log(elemDiv); }
     return elemDiv;
@@ -178,16 +178,47 @@ const getClusterState = () => {
     });
 };
 
-const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
-    //----- Build up namespace dropdown menu:
+const changeNamespace = () => {
+    var selectBox = document.getElementById("nsmenu");
+    var selectedValue = selectBox.options[selectBox.selectedIndex].value;
+    namespace = selectedValue;
+
+    console.log(window.namespace);
+    console.log(namespace);
+    //debug_loops+=1;
+    //setTimeout(getClusterState, getClusterState_timeout);
+
+    // force cluster update:
+    getClusterState();
+};
+
+const buildNamespaceMenu = (namespaces) => {
     let namespaceList=[];
-    let nsMenu='<select class="col dropbtn" id="nsmenu" >';
-    namespaces.forEach( (namespace, index) => {
-	//console.log(`namespace[${index}]: ${namespace.metadata.name}`);
-	nsMenu += '<option value="' + namespace.metadata.name + '">' + namespace.metadata.name + '</option>';
-	namespaceList.push(namespace.metadata.name);
+    let nsMenu='<select class="col dropbtn" id="nsmenu" onchange="changeNamespace();" >';
+
+    namespaces.forEach( (option_namespace, index) => {
+
+	//console.log(`option_namespace[${index}]: ${option_namespace.metadata.name}`);
+	    //
+	let selected='';
+	if (option_namespace.metadata.name == namespace) {
+	    selected=' selected="selected"';
+	}
+
+	nsMenu += `<option value="${option_namespace.metadata.name}" ${selected}> ${option_namespace.metadata.name} </option>`;
+	namespaceList.push(option_namespace.metadata.name);
     } );
+
     nsMenu += '</select>';
+    return nsMenu;
+};
+
+const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
+
+    //----- Build up namespace dropdown menu:
+    const nsMenu = buildNamespaceMenu(namespaces);
+
+    // TODO: Add modals as prettier tooltips ..
 
     // TODO: Add radio-button - show kubernetes entities?
     // TODO: Menu -> set namespace
@@ -275,7 +306,7 @@ if (lastreplicaset) {
 	podText = pod.metadata.name;
 	x += 100;
     
-	tooltip=`${pod.metadata.uid} - '${pod.metadata.name}`;
+	tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
 	podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip);
 	pods_info += podDiv;
     });
@@ -295,7 +326,7 @@ if (lastreplicaset) {
     if (masterIdx == undefined) {
 	console.log("Failed to detect Master node");
     }
-    console.log(`MASTER=node[${masterIdx}]='${master.metadata.name}'`);
+    console.log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
 
     ALL_info=''
     nodes.forEach( (node, index)      => {
@@ -317,7 +348,7 @@ if (lastreplicaset) {
 	     nodeText += pods_info;
 	}
 
-	tooltip=`${node.metadata.uid} - '${node.metadata.name}`;
+	tooltip=`${node.metadata.uid} - ${node.metadata.name}`;
 	nodeDiv = createElemDiv("node", node.metadata.uid, nodeText, x, y, tooltip);
 
 	ALL_info += nodeDiv;
@@ -325,13 +356,16 @@ if (lastreplicaset) {
     } );
 
 
-    if (debug_loops != 1) {
-	setTimeout(reload, getClusterState_timeout);
-    }
-
     // Redraw cluster only when changes are detected:
     if (detectChanges()) {
 	redrawAll(ALL_info);
+    }
+
+    if (debug_loops != 1) {
+	console.log(`setTimeout=${getClusterState_timeout}`);
+	setTimeout(getClusterState, getClusterState_timeout);
+    } else {
+	console.log('NO timeout set - stopping');
     }
 
 };
