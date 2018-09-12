@@ -57,11 +57,11 @@ const setPaths = (namespace) => {
     replicasets_path = "/apis/apps/v1/namespaces/" + namespace + "/replicasets";
 };
 
-const createElemDiv = (divclass, id, text, x, y, tooltip) => {
-    return startElemDiv(divclass, id, text, x, y, tooltip) + ' </div>';
+const createElemDiv = (divclass, id, text, x, y, tooltip, fg, bg) => {
+    return startElemDiv(divclass, id, text, x, y, tooltip, fg, bg) + ' </div>';
 }
 
-const startElemDiv = (divclass, id, text, x, y, tooltip) => {
+const startElemDiv = (divclass, id, text, x, y, tooltip, fg, bg) => {
     // create string <div> element
 
     let  type_info='';
@@ -69,7 +69,11 @@ const startElemDiv = (divclass, id, text, x, y, tooltip) => {
     if (include_type) {
         type_info=capitalize1stChar(divclass)+': ';
     }
-    const stElemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id} style="left: ${x};top: ${y};" > ${type_info}${text}`;
+
+    color_style=''
+    if (fg != undefined) { color_style+='color: ' + fg + ';'; }
+    if (bg != undefined) { color_style+='background: ' + bg + ';'; }
+    const stElemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id} style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
 
     if (debug) { console.log(stElemDiv)+' </div>'; }
     return stElemDiv;
@@ -392,7 +396,23 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 	 console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` );
 
 	 tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
-	 podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip);
+
+	 fg=undefined;
+	 bg=undefined;
+         if ( pod.status.phase == "Running" ) {
+	     // color based on style, label color or version ...
+	     fg=undefined;
+	 } else if ( pod.status.phase == "Error" ) {
+	     fg='red';
+	 } else {
+             // Pending, Container Creating
+	     fg='orange';
+	 }
+	 //fg='green';
+	 //bg='brown';
+	 fg='#0a0';
+	 bg='#aa0';
+	 podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip, fg, bg);
 	 const pod_info = podDiv;
 
 	 // just for fun: attribute to the 3 nodes for now:
@@ -400,7 +420,9 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 	     //
 	 // TODO: Use nodeName to find nodeIndex:
          nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
-         console.log(`${pod.metadata.name} is running on node[${nodeIndex}] '${pod.spec.nodeName}'`);
+         console.log(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
+
+
 	 nodeDivText[nodeIndex] += pod_info;
      });
 
