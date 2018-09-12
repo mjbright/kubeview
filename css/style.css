@@ -5,7 +5,7 @@
 
 
 .node {
-    border-radius: 25px; border-style: solid; border-width: 5px;
+    border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--node-border-color);
 
     padding: 5px;
@@ -21,7 +21,7 @@
 }
 
 .service {
-    border-radius: 25px; border-style: solid; border-width: 5px;
+    border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
     padding: 5px;
@@ -36,7 +36,7 @@
 }
 
 .deployment {
-    border-radius: 25px; border-style: solid; border-width: 5px;
+    border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
     padding: 5px;
@@ -52,7 +52,7 @@
 
 
 .replicaset {
-    border-radius: 25px; border-style: solid; border-width: 5px;
+    border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
     background-color: var(--replicaset-bg-color);

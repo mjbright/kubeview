@@ -1,7 +1,10 @@
 
 :root {
     --main-bg-color:     grey;
-    --main-border-color: darkgrey;
+    /*--main-border-color: darkgrey;
+    --main-border-width: 5px;*/
+    --main-border-color: #008;
+    --main-border-width: 2px;
  
     --title-color:       grey;
     --title-left-color:  grey;
