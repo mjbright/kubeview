@@ -322,6 +322,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 	     console.log(`service[${index}]: ${service.metadata.name}`);
 	 }
      } );
+     nodeDivText[masterIdx]+=services_info;
 
      deploys_info='';
      deployments.forEach( (deployment, index) => {
@@ -346,6 +347,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 	 }
 	// console.log(`deployment[${index}]: ${deployment.metadata.name}`);
      } );
+     nodeDivText[masterIdx]+=deploys_info;
 
 replicasets_info='';
 lastreplicaset=0;
