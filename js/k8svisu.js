@@ -74,8 +74,8 @@ const startElemDiv = (divclass, id, text, x, y, tooltip, fg, bg) => {
 
     color_style=''
     if (fg != undefined) { color_style+='color: ' + fg + ';'; }
-    if (bg != undefined) { color_style+='background: ' + bg + ';'; }
-    const stElemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id} style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
+    if (bg != undefined) { color_style+='background-color: ' + bg + ';'; }
+    const stElemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
 
     if (debug) { console.log(stElemDiv)+' </div>'; }
     return stElemDiv;
