@@ -312,6 +312,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 	nodeDivText[index] = startElemDiv("node", node.metadata.uid, nodeDivText[index], x, y, tooltip);
     });
 
+    services_info='';
     services.forEach( (service, index) => {
 	 let y=100+100*index;
 	 let x=10; //100*index;
