@@ -69,14 +69,17 @@ const startElemDiv = (divclass, id, text, x, y, tooltip) => {
     if (include_type) {
         type_info=capitalize1stChar(divclass)+': ';
     }
-    const elemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id} style="left: ${x};top: ${y};" > ${type_info}${text} </div>`;
+    const stElemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id} style="left: ${x};top: ${y};" > ${type_info}${text}`;
 
-    if (debug) { console.log(elemDiv); }
-    return elemDiv;
+    if (debug) { console.log(stElemDiv)+' </div>'; }
+    return stElemDiv;
 };
 
 const detectChanges = () => {
     // TODO: detect changes in API results ...
+
+
+    console.log(`#nodes=${nodes.length}`);
 
     return true;
 };
