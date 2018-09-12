@@ -8,6 +8,8 @@ let services = [];
 let deployments = [];
 let replicasets = [];
 let pods = [];
+let configHash='';
+let force_redraw=false;
 
 //-- Constant definitions: ----------------------------------------------------
 
@@ -59,23 +61,31 @@ const setPaths = (namespace) => {
     replicasets_path = "/apis/apps/v1/namespaces/" + namespace + "/replicasets";
 };
 
-const createElemDiv = (divclass, id, text, x, y, tooltip, fg, bg) => {
-    return startElemDiv(divclass, id, text, x, y, tooltip, fg, bg) + ' </div>';
+
+const createElemDiv = (classes, id, text, x, y, tooltip, fg, bg) => {
+    return startElemDiv(classes, id, text, x, y, tooltip, fg, bg) + ' </div>';
 }
 
-const startElemDiv = (divclass, id, text, x, y, tooltip, fg, bg) => {
+const startElemDiv = (classes, id, text, x, y, tooltip, fg, bg) => {
     // create string <div> element
 
     let  type_info='';
 
     if (include_type) {
-        type_info=capitalize1stChar(divclass)+': ';
+    // First class is the type:
+        let type=classes.split(" ")[0];
+        type_info=capitalize1stChar(type)+': ';
     }
 
     color_style=''
     if (fg != undefined) { color_style+='color: ' + fg + ';'; }
     if (bg != undefined) { color_style+='background-color: ' + bg + ';'; }
-    const stElemDiv=`<div class="${divclass} tooltip" data-tip="${tooltip}" id="${id}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
+    //const stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${id}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
+    if (color_style == '') {
+        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${id}" > ${type_info}${text}`;
+    } else {
+        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${id}" style="${color_style}" > ${type_info}${text}`;
+    }
 
     if (debug) { console.log(stElemDiv)+' </div>'; }
     return stElemDiv;
@@ -84,8 +94,38 @@ const startElemDiv = (divclass, id, text, x, y, tooltip, fg, bg) => {
 const detectChanges = () => {
     // TODO: detect changes in API results ...
 
+    let oldConfigHash=configHash;
 
-    console.log(`#nodes=${nodes.length}`);
+    configHash='';
+
+    nodes.forEach( (node, index) => {
+        configHash += node.metadata.uid
+    // todo state:
+    });
+    services.forEach( (service, index) => {
+        configHash += service.metadata.uid
+    // todo state ??:
+    });
+    deployments.forEach( (deploy, index) => {
+        configHash += deploy.metadata.uid
+    // todo state ??:
+    });
+    replicasets.forEach( (replicaset, index) => {
+        configHash += replicaset.metadata.uid
+    // todo state ??:
+    });
+    pods.forEach( (pod, index) => {
+        configHash += pod.metadata.uid
+    // todo state ??:
+    });
+
+    if (configHash == oldConfigHash) {
+        //console.log(`detectChanges: NO-REDRAW configHash=${configHash} == ${oldConfigHash}`);
+        return false;
+    }
+
+    //console.log(`detectChanges: REDRAW configHash=${configHash} != ${oldConfigHash}`);
+    //console.log(`#nodes=${nodes.length}`);
 
     return true;
 };
@@ -113,7 +153,7 @@ const getClusterState = () => {
 
     // EMPTY OUT WHOLE cluster canvas: TODO - do this intelligently
     // Don't redisplay at all if no changes seen via APIs.
-    $('#cluster').empty();
+    //$('#cluster').empty();
 
     setPaths(namespace);
 
@@ -206,6 +246,7 @@ const changeNamespace = () => {
 
     // force cluster update:
     getClusterState();
+    force_redraw=true;
 };
 
 const buildNamespaceMenu = (namespaces) => {
@@ -267,6 +308,35 @@ const getNodeIndex = (nodes, nodeName) => {
 
     die(`Failed to find node <${nodeName}> in list`);
     return -1;
+};
+
+const createDeploymentDiv = (deployment) => {
+    replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
+    //deploymentText=`${deployment.metadata.name} <br/> ${replicas} replicas`;
+    deploymentText=`${deployment.metadata.name} , ${replicas} replicas`;
+    tooltip=`${deployment.metadata.uid} - ${deployment.metadata.name}`;
+    x=0; y=0;
+    deploymentDiv = createElemDiv("deployment col", deployment.metadata.uid, deploymentText, x, y, tooltip);
+    return deploymentDiv;
+};
+
+const createReplicaSetDiv = (replicaset) => {
+    //replicas=`${replicaset.status.readyReplicas} / ${replicaset.spec.replicas}`;
+    //replicasetText=`${replicaset.metadata.name} <br/> ${replicas} replicas`;
+    replicasetText=`${replicaset.metadata.name}`;  // + //'<br/>' + //replicas + ' replicas</div>';
+    tooltip=`${replicaset.metadata.uid} - ${replicaset.metadata.name}`;
+    x=0; y=0;
+    replicasetDiv = createElemDiv("replicaset col", replicaset.metadata.uid, replicasetText, x, y, tooltip);
+    return replicasetDiv;
+};
+
+const indexOfUIDInList = (idlist, id) => {
+    var foundIdx=-1;
+
+    idlist.forEach( (item_id, index) => {
+        if (item_id == id) { foundIdx = index; return; }
+    });
+    return (foundIdx);
 };
 
 const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
@@ -345,42 +415,92 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         nodeDivText[index] = startElemDiv("node", node.metadata.uid, nodeDivText[index], x, y, tooltip);
     });
 
+    deploys_seen=[];
+    replicasets_seen=[];
+
     services_info='';
     services.forEach( (service, index) => {
-        let y=100+100*index;
+        //let y=100+100*index;
+        //let y=100*index;
+        let y=0;
         let x=10; //100*index;
 
         service.x = x; service.y = y;
         if (show_kube_components || (service.metadata.name != 'kubernetes')) {
             labels=getLabelsAnnotations(service);
             tooltip=`${service.metadata.uid} - ${service.metadata.name}  ${labels}`;
-            svcDiv = createElemDiv("service", service.metadata.uid, service.metadata.name, x, y, tooltip);
+            svcDiv = '';
+
+            svcDiv += '<div>';
+            //svcDiv += '<div class="row">';
+            //svcDiv += createElemDiv("service row", service.metadata.uid, service.metadata.name, x, y, tooltip);
+            svcDiv += createElemDiv("service", service.metadata.uid, service.metadata.name, x, y, tooltip);
+            //svcDiv += '</div>';
+            deployments.forEach( (deployment, index) => {
+                if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
+                    if (service.metadata.name == deployment.metadata.name) {
+                        //svcDiv += '<div class="col">';
+                        deploys_seen.push( deployment.metadata.uid );
+                        svcDiv += createDeploymentDiv(deployment);
+                        //svcDiv += '</div>';
+
+                        // replicaset.metadata.ownerReferences.name: flask-app (Deployment)
+                        replicasets.forEach( (replicaset, index) => {
+                            if (show_kube_components || (replicaset.metadata.name != 'kubernetes')) {
+                                owners = replicaset.metadata.ownerReferences;
+                    owners.forEach( (owner) => {
+                                    if (deployment.metadata.name == owner.name) {
+                                        //svcDiv += '<div class="col">';
+                            if (replicaset.spec.replicas != 0) {
+                                            console.log(`${replicaset.metadata.name}: [${replicaset.spec.replicas}] ${deployment.metadata.name} == ${owner.name}`);
+                                            replicasets_seen.push( replicaset.metadata.uid );
+                                            svcDiv += createReplicaSetDiv(replicaset);
+                                }
+                                        //svcDiv += '</div>';
+                            //} else {
+                                        //console.log(`${deployment.metadata.name} != ${owner.name}`);
+                        }
+                    });
+                    }
+                        });
+                    }
+                }
+            });
+
+// die("CHECK");
+            svcDiv += '</div>';
+            svcDiv += '<br/>';
             services_info+=svcDiv;
+            console.log(`services_info='${services_info}'`);
+        //die("CHECK THIS OUT");
+
             console.log(`service[${index}]: ${service.metadata.name}`);
+        //XX add deployments/replicasets
         }
      } );
      nodeDivText[masterIdx]+=services_info;
 
      deploys_info='';
      deployments.forEach( (deployment, index) => {
-         let y=100+100*index;
+         // let y=100+100*index;
+         let y=0;
          let x=110; //100*index;
 
-         if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
-             services.forEach( service => {
-                 if (service.metadata.name == deployment.metadata.name) {
-                     x = service.x + 180; deployment.x = x;
-                     y = service.y + 50;  deployment.y = y;
-                     //!! no break;
-                 }
-             })
+         itemSeenIdx = indexOfUIDInList(deploys_seen, deployment.metadata.uid);
+     console.log(`${itemSeenIdx} ${deployment.metadata.uid}`);
+     //console.log(`${itemSeenIdx} ` + $.param( deployment.metadata, true));
 
-             replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
-             deploymentText=`${deployment.metadata.name} <br/> ${replicas} replicas`;
-             tooltip=`${deployment.metadata.uid} - ${deployment.metadata.name}`;
-             deploymentDiv = createElemDiv("deployment", deployment.metadata.uid, deploymentText, x, y, tooltip);
-
-             deploys_info+=deploymentDiv;
+     if (itemSeenIdx == -1) {
+             if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
+                 services.forEach( service => {
+                     if (service.metadata.name == deployment.metadata.name) {
+                         //x = service.x + 180; deployment.x = x;
+                         //y = service.y + 50;  deployment.y = y;
+                         //!! no break;
+                     }
+                 })
+                 deploys_info+=createDeploymentDiv(deployment);
+             }
          }
         // console.log(`deployment[${index}]: ${deployment.metadata.name}`);
      } );
@@ -394,21 +514,22 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          lastreplicaset=replicaset;
 
-         if (replicaset.metadata.name != 'kubernetes') {
-             deployments.forEach( deployment => {
-                 if (deployment.metadata.name == replicaset.metadata.name) {
-                     x = deployment.x + 180; replicaset.x = x;
-                     y = deployment.y + 50;  replicaset.y = y;
-                     //!! no break;
+         itemSeenIdx = indexOfUIDInList(replicasets_seen, replicaset.metadata.uid);
+     if (itemSeenIdx == -1) {
+             if (show_kube_components || (replicaset.metadata.name != 'kubernetes')) {
+             //deployments.forEach( deployment => {
+                 //if (deployment.metadata.name == replicaset.metadata.name) {
+                     //x = deployment.x + 180; replicaset.x = x;
+                     //y = deployment.y + 50;  replicaset.y = y;
+                     ////!! no break;
+                 //}
+             //})
+
+             if (replicaset.spec.replicas != 0) {
+                     replicasets_info += createReplicaSetDiv(replicaset);
+                     //console.log(replicaset);
                  }
-             })
-
-             //replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
-             replicasetText=`${replicaset.metadata.name}`;  // + //'<br/>' + //replicas + ' replicas</div>';
-             replicasetDiv=createElemDiv("replicaset", replicaset.metadata.uid, replicasetText, x, y, tooltip);
-
-             replicasets_info+=replicasetDiv;
-             //console.log(replicaset);
+             }
          }
          // console.log(`replicaset[${index}]: ${replicaset.metadata.name}`);
      } );
@@ -417,10 +538,13 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      x = 0;
      y = 0;
 
+    /*
      //if (lastreplicaset) {
          //y = lastreplicaset.y+100;
-     let loop=0;
+     let loop=0;*/
+//    pods=[]; // TESTING
      console.log(`#pods=${pods.length}`);
+     lastImage=undefined;
      pods.forEach( (pod, index) => {
          console.log(`pod[${index}]: ${pod.metadata.name}`);
          podText = pod.metadata.name;
@@ -431,12 +555,26 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
 
+         image=pod.spec.containers[0].image
          fg=undefined;
-     bg=undefined;
-         pod.status.phase = "Error";
+         bg=undefined;
+         // pod.status.phase = "Error";
          if ( pod.status.phase == "Running" ) {
              // color based on style, label color or version ...
              fg=undefined;
+             if (image.indexOf("v1") != -1) {
+                 bg='#aa0';
+         } else if (image.indexOf("v2") != -1) {
+                 bg='#aa0';
+         } else if (image.indexOf("v3") != -1) {
+                 bg='#0aa';
+         } else if (image.indexOf("v4") != -1) {
+                 bg='#0a0';
+         } else if (image.indexOf("v5") != -1) {
+                 bg='#00a';
+         } else {
+                 bg='#660';
+         }
          } else if ( pod.status.phase == "Error" ) {
              fg='red';
              bg='pink';
@@ -444,7 +582,14 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
              // Pending, Container Creating
              fg='orange';
          }
-         podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip, fg, bg);
+
+     classes="pod"
+     if (image == lastImage) {
+         classes += " row"
+         }
+         podDiv = createElemDiv(classes, pod.metadata.uid, podText, x, y, tooltip, fg, bg);
+
+         lastImage=image;
          const pod_info = podDiv;
 
          nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
@@ -452,13 +597,14 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          nodeDivText[nodeIndex] += pod_info;
      });
+/*     */
 
      nodes.forEach( (node, index)      => {
          ALL_info += nodeDivText[index] + ' </div>';
      });
 
      // Redraw cluster only when changes are detected:
-     if (detectChanges()) {
+     if ( force_redraw || detectChanges() ) {
          redrawAll(ALL_info);
      }
 
@@ -493,6 +639,24 @@ const redrawAll = (info) => {
     if (debug) { console.log("redrawAll @ " + jQuery.now()); }
 
     $('#cluster').append(info);
+    pods.forEach( (pod, index) => {
+        owners = pod.metadata.ownerReferences;
+        owners.forEach( (owner, index) => {
+
+            console.log( $.param( owner, true) );
+
+            console.log(`jsPlumb.connect( source: ${pod.metadata.uid}, target: ${owner.uid} );`);
+            jsPlumb.connect({
+                source: pod.metadata.uid,
+                target: owner.uid,
+                anchors: ["Bottom", "Bottom"],
+                paintStyle: {lineWidth: 5, strokeStyle: 'blue'},
+                joinStyle: "round",
+                endpointStyle: {fillStyle: 'blue', radius: 7},
+                connector: ["Flowchart", {cornerRadius: 5}]
+            });
+        });
+    });
 };
 
 
