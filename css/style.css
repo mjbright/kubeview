@@ -64,8 +64,8 @@
     border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
-    background-color: var(--pod-bg-color) !important;
-    color: var(--pod-fg-color) !important;
+    background-color: var(--pod-bg-color) ;
+    color: var(--pod-fg-color) ;
     /* width: 150px; */
     width: max-content; height: max-content;
 }
