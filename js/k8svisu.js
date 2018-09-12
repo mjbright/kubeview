@@ -14,7 +14,9 @@ let pods = [];
 const debug=true;
 //const debug_loops=1;
 //const debug_loops=0;
-var debug_loops=1;
+//var debug_loops=1;
+var pause_visu=false;
+var show_kube_components=false;
 const debug_timing=false;
 
 // Include type prefix in displayed element names, e.g. 'Service: <service-name>':
@@ -201,8 +203,6 @@ const changeNamespace = () => {
 
     console.log(window.namespace);
     console.log(namespace);
-    //debug_loops+=1;
-    //setTimeout(getClusterState, getClusterState_timeout);
 
     // force cluster update:
     getClusterState();
@@ -277,12 +277,47 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
     const nsMenu = buildNamespaceMenu(namespaces);
 
     // TODO: Add modals as prettier tooltips ..
+    let checked='';
 
-    // TODO: Add radio-button - show kubernetes entities?
-    // TODO: Menu -> set namespace
-    namespace_info='<div><div class="row" ><b>Namespace:</b> </div> <div class="col" >' + nsMenu + '</div> ' + sourceURL + ' </div>'; // + namespace;
+    if (!pause_visu) { checked="checked='checked'"; }
+    let runningButtonText='<div class="col">' +
+        '<input type="checkbox" id="run_or_pause" name="run_or_pause" ' + checked + ' value="Run" />' +
+        '<label for="Run">Run</label>' +
+      '</div>';
+
+    checked='';
+    if (show_kube_components) { checked="checked='checked'"; }
+    let showKubeCompButtonText='<div class="col">' +
+        '<input type="checkbox" id="show_kubernetes" name="show_kubernetes" ' + checked + ' value="show_all" />' +
+        '<label for="show_all">Show Kubernetes components</label>' +
+      '</div>';
+
+    let toplineMenu='<div><div class="row" ><b>Namespace:</b> </div> <div class="col" >' + nsMenu + '</div> ' +
+            runningButtonText + showKubeCompButtonText + ';&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ' + sourceURL + ' </div>';
+
     $('#k8s_namespace').empty();
-    $('#k8s_namespace').append(namespace_info);
+    $('#k8s_namespace').append(toplineMenu);
+
+    let runningButton = document.querySelector('#run_or_pause');
+    let showKubeCompButton = document.querySelector('#show_kubernetes');
+    runningButton.addEventListener('click', (e) => {
+        pause_visu = !pause_visu;
+        if (pause_visu) {
+        console.log("Visualization paused");
+    } else {
+        console.log("Visualization restarted");
+        setTimeout(getClusterState, getClusterState_timeout);
+    };
+    });
+
+    showKubeCompButton.addEventListener('click', (e) => {
+        show_kube_components = !show_kube_components;
+        if (show_kube_components) {
+     console.log("Show Kubernetes Components");
+     } else {
+         console.log("Hide Kubernetes Components");
+     };
+     });
 
     var ALL_info=''
     var nodeDivText=[];
@@ -389,60 +424,52 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      let loop=0;
      console.log(`#pods=${pods.length}`);
      pods.forEach( (pod, index) => {
-	 console.log(`pod[${index}]: ${pod.metadata.name}`);
-	 podText = pod.metadata.name;
-	 x += 100;
+     console.log(`pod[${index}]: ${pod.metadata.name}`);
+     podText = pod.metadata.name;
+     x += 100;
          loop++;
 
-	 console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` );
+     console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` );
 
-	 tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
+     tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
 
-	 fg=undefined;
-	 bg=undefined;
-         if ( pod.status.phase == "Running" ) {
-	     // color based on style, label color or version ...
-	     fg=undefined;
-	 } else if ( pod.status.phase == "Error" ) {
-	     fg='red';
-	 } else {
+     fg=undefined;
+     bg=undefined;
+     pod.status.phase = "Error";
+     if ( pod.status.phase == "Running" ) {
+         // color based on style, label color or version ...
+         fg=undefined;
+     } else if ( pod.status.phase == "Error" ) {
+         fg='red';
+         bg='pink';
+     } else {
              // Pending, Container Creating
-	     fg='orange';
-	 }
-	 //fg='green';
-	 //bg='brown';
-	 fg='#0a0';
-	 bg='#aa0';
-	 podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip, fg, bg);
-	 const pod_info = podDiv;
+         fg='orange';
+     }
+     podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip, fg, bg);
+     const pod_info = podDiv;
 
-	 // just for fun: attribute to the 3 nodes for now:
-	 // nodeDivText[loop % nodeDivText.length] += pod_info;
-	     //
-	 // TODO: Use nodeName to find nodeIndex:
          nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
          console.log(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
 
-
-	 nodeDivText[nodeIndex] += pod_info;
+         nodeDivText[nodeIndex] += pod_info;
      });
 
      nodes.forEach( (node, index)      => {
-	 ALL_info += nodeDivText[index] + ' </div>';
+     ALL_info += nodeDivText[index] + ' </div>';
      });
 
      // Redraw cluster only when changes are detected:
      if (detectChanges()) {
-	 redrawAll(ALL_info);
+     redrawAll(ALL_info);
      }
 
-     if (debug_loops != 1) {
-	 console.log(`setTimeout=${getClusterState_timeout}`);
-	 setTimeout(getClusterState, getClusterState_timeout);
+     if (pause_visu) {
+         console.log('NO timeout set - stopping');
      } else {
-	 console.log('NO timeout set - stopping');
+         console.log(`setTimeout=${getClusterState_timeout}`);
+         setTimeout(getClusterState, getClusterState_timeout);
      }
-
 };
 
 const initialLoad = () => {
