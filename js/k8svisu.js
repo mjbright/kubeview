@@ -369,12 +369,56 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 	     replicasetText=`${replicaset.metadata.name}`;  // + //'<br/>' + //replicas + ' replicas</div>';
 	     replicasetDiv=createElemDiv("replicaset", replicaset.metadata.uid, replicasetText, x, y, tooltip);
 
-    if (debug_loops != 1) {
-	console.log(`setTimeout=${getClusterState_timeout}`);
-	setTimeout(getClusterState, getClusterState_timeout);
-    } else {
-	console.log('NO timeout set - stopping');
-    }
+	     replicasets_info+=replicasetDiv;
+	     //console.log(replicaset);
+         }
+        // console.log(`replicaset[${index}]: ${replicaset.metadata.name}`);
+     } );
+     nodeDivText[masterIdx]+=replicasets_info;
+
+     x = 0;
+     y = 0;
+
+     //if (lastreplicaset) {
+         //y = lastreplicaset.y+100;
+     let loop=0;
+     console.log(`#pods=${pods.length}`);
+     pods.forEach( (pod, index) => {
+	 console.log(`pod[${index}]: ${pod.metadata.name}`);
+	 podText = pod.metadata.name;
+	 x += 100;
+         loop++;
+
+	 console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` );
+
+	 tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
+	 podDiv = createElemDiv("pod", pod.metadata.uid, podText, x, y, tooltip);
+	 const pod_info = podDiv;
+
+	 // just for fun: attribute to the 3 nodes for now:
+	 // nodeDivText[loop % nodeDivText.length] += pod_info;
+	     //
+	 // TODO: Use nodeName to find nodeIndex:
+         nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
+         console.log(`${pod.metadata.name} is running on node[${nodeIndex}] '${pod.spec.nodeName}'`);
+	 nodeDivText[nodeIndex] += pod_info;
+     });
+
+     nodes.forEach( (node, index)      => {
+	 ALL_info += nodeDivText[index] + ' </div>';
+     });
+
+     // Redraw cluster only when changes are detected:
+     if (detectChanges()) {
+	 redrawAll(ALL_info);
+     }
+
+     if (debug_loops != 1) {
+	 console.log(`setTimeout=${getClusterState_timeout}`);
+	 setTimeout(getClusterState, getClusterState_timeout);
+     } else {
+	 console.log('NO timeout set - stopping');
+     }
 
 };
 
