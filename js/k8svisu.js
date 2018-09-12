@@ -58,6 +58,10 @@ const setPaths = (namespace) => {
 };
 
 const createElemDiv = (divclass, id, text, x, y, tooltip) => {
+    return startElemDiv(divclass, id, text, x, y, tooltip) + ' </div>';
+}
+
+const startElemDiv = (divclass, id, text, x, y, tooltip) => {
     // create string <div> element
 
     let  type_info='';
