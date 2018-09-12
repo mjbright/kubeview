@@ -340,7 +340,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
 	     replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
 	     deploymentText=`${deployment.metadata.name} <br/> ${replicas} replicas`;
-	     tooltip=`${deployment.metadata.uid} - '${deployment.metadata.name}`;
+	     tooltip=`${deployment.metadata.uid} - ${deployment.metadata.name}`;
 	     deploymentDiv = createElemDiv("deployment", deployment.metadata.uid, deploymentText, x, y, tooltip);
 
 	     deploys_info+=deploymentDiv;
