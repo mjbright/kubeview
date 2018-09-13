@@ -19,6 +19,12 @@ press_RUN() {
     $*
 }
 
+getURL() {
+    local URL=$1
+
+    #press_RUN wget -O - ${URL}/
+    press_RUN curl -A Chrome -sL ${URL}/
+}
 
 press_RUN "kubectl get nodes -o wide"
 
@@ -26,7 +32,7 @@ press "Obtain the master public ip:"
 kubectl describe node master | grep -i ip
 MASTER_FLANNEL_IP=$( kubectl describe node master | awk '/public-ip=/ { FS="="; $0=$1; print $2; }' )
 
-if [ 1 -eq 0 ];then
+#if [ 1 -eq 0 ];then
 
 press_RUN kubectl get pods
 
@@ -42,14 +48,14 @@ press_RUN kubectl get svc
 
 press_RUN kubectl apply -f yaml/flask-service.yaml 
 press_RUN kubectl get svc
-fi
+#fi
 
 SERVICE_PORT=$( kubectl get svc --no-headers flask-app | sed -e 's/.*://' -e 's/\/TCP.*//' )
 SERVICE_URL=http://${MASTER_FLANNEL_IP}:${SERVICE_PORT}
 
 #if [ 1 -eq 0 ];then
 #fi
-press_RUN wget -O - ${SERVICE_URL}/
+getURL ${SERVICE_URL}/
 
 press_RUN kubectl apply -f yaml/flask-deployment.yaml.r4.v1.yaml 
 press_RUN kubectl get pods
