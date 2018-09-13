@@ -8,6 +8,7 @@ let services = [];
 let deployments = [];
 let replicasets = [];
 let pods = [];
+let ids_seen = [];
 let configHash='';
 let force_redraw=false;
 
@@ -114,7 +115,14 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
     color_style=''
     if (fg != undefined) { color_style+='color: ' + fg + ';'; }
     if (bg != undefined) { color_style+='background-color: ' + bg + ';'; }
-    //const stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
+
+    itemSeenIdx = indexOfUIDInList(ids_seen, uid);
+    if (itemSeenIdx != -1) {
+        die("id seen already: " + uid);
+    }
+    ids_seen.push( uid );
+
+    //const stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
     if (color_style == '') {
         stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" > ${type_info}${text}`;
     } else {
@@ -214,6 +222,8 @@ const getClusterState = () => {
     const getdeploys=true;
     const getrs=true;
     const getpods=true;
+
+    ids_seen = [];
 
     nodes = [];
     namespaces = [];
