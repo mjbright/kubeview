@@ -13,12 +13,12 @@ let force_redraw=false;
 
 //-- Constant definitions: ----------------------------------------------------
 
-const debug=true;
-const debug_nodes=true;
-const debug_services=true;
-const debug_deploys=true;
-const debug_replicasets=true;
-const debug_pods=true;
+const debug=false;
+const debug_nodes=false;
+const debug_services=false;
+const debug_deploys=false;
+const debug_replicasets=false;
+const debug_pods=false;
 const debug_connect=true;
 
 const debug_node = (msg) => { if (debug_nodes)    console.log("debug_node: " + msg); }
