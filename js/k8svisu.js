@@ -14,6 +14,19 @@ let force_redraw=false;
 //-- Constant definitions: ----------------------------------------------------
 
 const debug=true;
+const debug_nodes=true;
+const debug_services=true;
+const debug_deploys=true;
+const debug_replicasets=true;
+const debug_pods=true;
+const debug_connect=true;
+
+const debug_node = (msg) => { if (debug_nodes)    console.log("debug_node: " + msg); }
+const debug_svc  = (msg) => { if (debug_services) console.log("debug_service: " + msg); }
+const debug_dep  = (msg) => { if (debug_deploys)  console.log("debug_deploy: " + msg); }
+const debug_rs   = (msg) => { if (debug_replicasets) console.log("debug_replicaset: " + msg); }
+const debug_pod  = (msg) => { if (debug_pods)     console.log("debug_pod: " + msg); }
+
 //const debug_loops=1;
 //const debug_loops=0;
 //var debug_loops=1;
@@ -84,10 +97,24 @@ const startElemDiv = (classes, id, text, x, y, tooltip, fg, bg) => {
     if (color_style == '') {
         stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${id}" > ${type_info}${text}`;
     } else {
-        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${id}" style="${color_style}" > ${type_info}${text}`;
+        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" style="${color_style}" > ${type_info}${text}`;
     }
 
-    if (debug) { console.log(stElemDiv)+' </div>'; }
+
+    if (type == 'node' && debug_node) {
+        console.log(stElemDiv+' </div>');
+    } else if (type == 'service' && debug_svc) {
+        console.log(stElemDiv+' </div>');
+    } else if (type == 'deployment' && debug_dep) {
+        console.log(stElemDiv+' </div>');
+    } else if (type == 'replicaset' && debug_rs) {
+        console.log(stElemDiv+' </div>');
+    } else if (type == 'pod' && debug_pod) {
+        console.log(stElemDiv+' </div>');
+    } else {
+        if (debug) { console.log(stElemDiv+' </div>'); }
+    }
+
     return stElemDiv;
 };
 
@@ -538,20 +565,15 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      x = 0;
      y = 0;
 
-    /*
-     //if (lastreplicaset) {
-         //y = lastreplicaset.y+100;
-     let loop=0;*/
-//    pods=[]; // TESTING
      console.log(`#pods=${pods.length}`);
      lastImage=undefined;
      pods.forEach( (pod, index) => {
-         console.log(`pod[${index}]: ${pod.metadata.name}`);
+         if (debug_pod) { console.log(`pod[${index}]: ${pod.metadata.name}`); }
          podText = pod.metadata.name;
          x += 100;
          loop++;
 
-         console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` );
+         if (debug_pod) { console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` ); }
 
          tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
 
@@ -597,7 +619,6 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          nodeDivText[nodeIndex] += pod_info;
      });
-/*     */
 
      nodes.forEach( (node, index)      => {
          ALL_info += nodeDivText[index] + ' </div>';
@@ -643,9 +664,14 @@ const redrawAll = (info) => {
         owners = pod.metadata.ownerReferences;
         owners.forEach( (owner, index) => {
 
-            console.log( $.param( owner, true) );
+            if (debug_connect) {
+                // console.log( $.param( owner, true) );
+                console.log(`jsPlumb.connect( source[pod/${pod.metadata.name}]: ${pod.metadata.uid}, target[${owner.kind}/${owner.name}]: ${owner.uid} );`);
 
-            console.log(`jsPlumb.connect( source: ${pod.metadata.uid}, target: ${owner.uid} );`);
+	      //ownerReference
+	      // [ { apiVersion: 'apps/v1', kind: 'Deployment', name: 'redis', uid: 'f8134aa4-b534-11e8-8a06-525400c9c704', controller: true, blockOwnerDeletion: true } ] },
+	    }
+
             jsPlumb.connect({
                 source: pod.metadata.uid,
                 target: owner.uid,
