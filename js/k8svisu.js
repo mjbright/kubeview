@@ -75,27 +75,48 @@ const setPaths = (namespace) => {
 };
 
 
-const createElemDiv = (classes, id, text, x, y, tooltip, fg, bg) => {
-    return startElemDiv(classes, id, text, x, y, tooltip, fg, bg) + ' </div>';
+const createElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
+    return startElemDiv(classes, object, text, x, y, tooltip, fg, bg) + ' </div>';
 }
 
-const startElemDiv = (classes, id, text, x, y, tooltip, fg, bg) => {
+const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
     // create string <div> element
 
     let  type_info='';
 
-    if (include_type) {
     // First class is the type:
-        let type=classes.split(" ")[0];
-        type_info=capitalize1stChar(type)+': ';
+    let type=classes.split(" ")[0];
+
+    if (include_type) {
+        if (type == 'node') {
+            type_info="Node: ";
+	} else if (type == 'service') {
+            type_info="Svc: ";
+	} else if (type == 'deployment') {
+            type_info="Dep: ";
+	} else if (type == 'replicaset') {
+            type_info="Rs: ";
+	} else if (type == 'pod') {
+            type_info="";
+	} else {
+            type_info=capitalize1stChar(type)+': ';
+	}
+    }
+
+    const uid=object.metadata.uid;
+    const name=object.metadata.name;
+    if (tooltip != '') {
+        tooltip=`${name}[uid:${uid}] ` + tooltip;
+    } else {
+        tooltip=`${name}[uid:${uid}]`;
     }
 
     color_style=''
     if (fg != undefined) { color_style+='color: ' + fg + ';'; }
     if (bg != undefined) { color_style+='background-color: ' + bg + ';'; }
-    //const stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${id}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
+    //const stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
     if (color_style == '') {
-        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${id}" > ${type_info}${text}`;
+        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" > ${type_info}${text}`;
     } else {
         stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" style="${color_style}" > ${type_info}${text}`;
     }
@@ -194,13 +215,12 @@ const getClusterState = () => {
     const getrs=true;
     const getpods=true;
 
-    // TODO: dependent on getnodes, etc? ...
-    /*nodes = [];
+    nodes = [];
     namespaces = [];
     deployments = [];
     replicasets = [];
     pods = [];
-    services = [];*/
+    services = [];
 
     if ( getnodes ) {
         const nodesReq = $.getJSON(nodes_path, (obj) => {
@@ -337,24 +357,40 @@ const getNodeIndex = (nodes, nodeName) => {
     return -1;
 };
 
-const createDeploymentDiv = (deployment) => {
-    replicas=`${deployment.status.readyReplicas} / ${deployment.spec.replicas}`;
-    //deploymentText=`${deployment.metadata.name} <br/> ${replicas} replicas`;
-    deploymentText=`${deployment.metadata.name} , ${replicas} replicas`;
-    tooltip=`${deployment.metadata.uid} - ${deployment.metadata.name}`;
-    x=0; y=0;
-    deploymentDiv = createElemDiv("deployment col", deployment.metadata.uid, deploymentText, x, y, tooltip);
-    return deploymentDiv;
+const createDeploymentDiv = (object) => {
+    let replicas=`${object.status.readyReplicas}/${object.spec.replicas}`;
+    let objectText=`${object.metadata.name} [${replicas}]`;
+    if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
+
+    let labels=getLabelsAnnotations(object);
+    let tooltip=`${labels}`;
+    let x=0;
+    let y=0;
+
+    objectDiv = createElemDiv("deployment col", object, objectText, x, y, tooltip);
+    return objectDiv;
 };
 
-const createReplicaSetDiv = (replicaset) => {
-    //replicas=`${replicaset.status.readyReplicas} / ${replicaset.spec.replicas}`;
-    //replicasetText=`${replicaset.metadata.name} <br/> ${replicas} replicas`;
-    replicasetText=`${replicaset.metadata.name}`;  // + //'<br/>' + //replicas + ' replicas</div>';
-    tooltip=`${replicaset.metadata.uid} - ${replicaset.metadata.name}`;
-    x=0; y=0;
-    replicasetDiv = createElemDiv("replicaset col", replicaset.metadata.uid, replicasetText, x, y, tooltip);
-    return replicasetDiv;
+const createReplicaSetDiv = (object) => {
+    let replicas = object.spec.replicas;
+    let objectText=`${object.metadata.name}[${replicas}]`;
+    if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
+
+    let labels=getLabelsAnnotations(object);
+    let tooltip=`${labels}`;
+    let x=0;
+    let y=0;
+
+    if (replicas == 0) {
+        fg='black';
+        bg='gray';
+        objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip, fg, bg);
+    } else {
+        objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip);
+    }
+
+
+    return objectDiv;
 };
 
 const indexOfUIDInList = (idlist, id) => {
@@ -433,13 +469,19 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         name = node.metadata.name;
         role = 'worker';
         if (index == masterIdx) {
-            name = '*' + node.metadata.name;
+            name = '<b>*<u>' + node.metadata.name + '</u>*</b>';
             role = 'master';
         }
 
         nodeDivText[index]+='<i>' + name + '</i>';
-        tooltip=`${node.metadata.uid} - ${node.metadata.name}`;
-        nodeDivText[index] = startElemDiv("node", node.metadata.uid, nodeDivText[index], x, y, tooltip);
+        tooltip=''
+        nodeDivText[index] = startElemDiv("node", node, nodeDivText[index], x, y, tooltip);
+        if (index != masterIdx) {
+	    nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />'; /* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
+        }
+
+        // Used for correct pod placement on a row:
+        node.lastPodImage=undefined;
     });
 
     deploys_seen=[];
@@ -455,14 +497,26 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         service.x = x; service.y = y;
         if (show_kube_components || (service.metadata.name != 'kubernetes')) {
             labels=getLabelsAnnotations(service);
-            tooltip=`${service.metadata.uid} - ${service.metadata.name}  ${labels}`;
+
+            // spec: { ports: [ { protocol: 'TCP', port: 5000, targetPort: 5000, nodePort: 31896 } ],
+            ports_info='PORTS: ';
+            node_port=undefined;
+            service.spec.ports.forEach( (port, index) => {
+                ports_info+=$.param( port, true);
+		if (port.nodePort) {
+                    node_port=port.nodePort;
+		}
+	    });
+
+            tooltip=`${ports_info}  ${labels}`;
             svcDiv = '';
 
             svcDiv += '<div>';
-            //svcDiv += '<div class="row">';
-            //svcDiv += createElemDiv("service row", service.metadata.uid, service.metadata.name, x, y, tooltip);
-            svcDiv += createElemDiv("service", service.metadata.uid, service.metadata.name, x, y, tooltip);
-            //svcDiv += '</div>';
+            label = service.metadata.name;
+            if (node_port != undefined) {
+                label += '[' + node_port + ']';
+	    }
+            svcDiv += createElemDiv("service", service, label, x, y, tooltip);
             deployments.forEach( (deployment, index) => {
                 if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
                     if (service.metadata.name == deployment.metadata.name) {
@@ -475,34 +529,28 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                         replicasets.forEach( (replicaset, index) => {
                             if (show_kube_components || (replicaset.metadata.name != 'kubernetes')) {
                                 owners = replicaset.metadata.ownerReferences;
-                    owners.forEach( (owner) => {
+                                owners.forEach( (owner) => {
                                     if (deployment.metadata.name == owner.name) {
                                         //svcDiv += '<div class="col">';
-                            if (replicaset.spec.replicas != 0) {
+                                        replicasets_seen.push( replicaset.metadata.uid );
+                                        svcDiv += createReplicaSetDiv(replicaset);
+                                        if (debug_svc) {
                                             console.log(`${replicaset.metadata.name}: [${replicaset.spec.replicas}] ${deployment.metadata.name} == ${owner.name}`);
-                                            replicasets_seen.push( replicaset.metadata.uid );
-                                            svcDiv += createReplicaSetDiv(replicaset);
-                                }
-                                        //svcDiv += '</div>';
-                            //} else {
-                                        //console.log(`${deployment.metadata.name} != ${owner.name}`);
-                        }
-                    });
-                    }
-                        });
-                    }
+					}
+                                    }
+                               });
+                         }
+                      });
+                   }
                 }
             });
 
-// die("CHECK");
             svcDiv += '</div>';
             svcDiv += '<br/>';
             services_info+=svcDiv;
             console.log(`services_info='${services_info}'`);
-        //die("CHECK THIS OUT");
 
             console.log(`service[${index}]: ${service.metadata.name}`);
-        //XX add deployments/replicasets
         }
      } );
      nodeDivText[masterIdx]+=services_info;
@@ -552,10 +600,8 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                  //}
              //})
 
-             if (replicaset.spec.replicas != 0) {
-                     replicasets_info += createReplicaSetDiv(replicaset);
-                     //console.log(replicaset);
-                 }
+                 replicasets_info += createReplicaSetDiv(replicaset);
+                 //console.log(replicaset);
              }
          }
          // console.log(`replicaset[${index}]: ${replicaset.metadata.name}`);
@@ -566,7 +612,6 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      y = 0;
 
      console.log(`#pods=${pods.length}`);
-     lastImage=undefined;
      pods.forEach( (pod, index) => {
          if (debug_pod) { console.log(`pod[${index}]: ${pod.metadata.name}`); }
          podText = pod.metadata.name;
@@ -575,7 +620,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          if (debug_pod) { console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` ); }
 
-         tooltip=`${pod.metadata.uid} - ${pod.metadata.name}`;
+         tooltip='';
 
          image=pod.spec.containers[0].image
          fg=undefined;
@@ -605,17 +650,22 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
              fg='orange';
          }
 
-     classes="pod"
-     if (image == lastImage) {
-         classes += " row"
+         nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
+         if (debug_pod) {
+             console.log(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
          }
-         podDiv = createElemDiv(classes, pod.metadata.uid, podText, x, y, tooltip, fg, bg);
 
-         lastImage=image;
+         classes="pod"
+         if (nodes[nodeIndex].lastPodImage == undefined) {
+            classes += " row";
+	 } else if (nodes[nodeIndex].lastPodImage == image) {
+            classes += " col";
+	 }
+         podDiv = createElemDiv(classes, pod, podText, x, y, tooltip, fg, bg);
+
+         nodes[nodeIndex].lastPodImage=image;
          const pod_info = podDiv;
 
-         nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
-         console.log(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
 
          nodeDivText[nodeIndex] += pod_info;
      });
@@ -668,9 +718,9 @@ const redrawAll = (info) => {
                 // console.log( $.param( owner, true) );
                 console.log(`jsPlumb.connect( source[pod/${pod.metadata.name}]: ${pod.metadata.uid}, target[${owner.kind}/${owner.name}]: ${owner.uid} );`);
 
-	      //ownerReference
-	      // [ { apiVersion: 'apps/v1', kind: 'Deployment', name: 'redis', uid: 'f8134aa4-b534-11e8-8a06-525400c9c704', controller: true, blockOwnerDeletion: true } ] },
-	    }
+	        //ownerReference
+	        //[{ apiVersion: 'apps/v1', kind: 'Deployment', name: 'redis', uid: 'f8134aa4-b534-11e8-8a06-525400c9c704', controller: true, blockOwnerDeletion: true }]
+            }
 
             jsPlumb.connect({
                 source: pod.metadata.uid,
@@ -683,6 +733,8 @@ const redrawAll = (info) => {
             });
         });
     });
+
+    //die("Check connections");
 };
 
 
