@@ -33,8 +33,7 @@ if [ "$1" = "--delete-images" ];then
 	    die "No running nodes"
     }
 
-
-    for NODE in "$VAGRANT_NODES"; do
+    for NODE in $VAGRANT_NODES; do
         echo "-- BEFORE: Images on $NODE"
         vagrant ssh $NODE -- "sudo docker images | awk '/^$IMAGE_PREFIX/ { print \$1; };'"
         vagrant ssh $NODE -- "sudo docker rmi \$(sudo docker images | awk '/^$IMAGE_PREFIX/ { print \$1:\$2; };')"
@@ -42,7 +41,7 @@ if [ "$1" = "--delete-images" ];then
     done
 
     echo; echo "-------------------------------------------------"
-    for NODE in "$VAGRANT_NODES"; do
+    for NODE in $VAGRANT_NODES; do
         echo "-- AFTER: Images on $NODE"
         vagrant ssh $NODE -- "sudo docker images | awk '/^$IMAGE_PREFIX/ { print \$1; };'"
 
