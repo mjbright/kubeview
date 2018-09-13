@@ -21,6 +21,7 @@ const debug_deploys=false;
 const debug_replicasets=false;
 const debug_pods=false;
 const debug_connects=true;
+const debug_colors=true;
 const enable_connects=false; // Needs placement debugging !
 
 const debug_log  = (msg) => { if (debug)          console.log("debug: " + msg); }
@@ -30,6 +31,7 @@ const debug_dep  = (msg) => { if (debug_deploys)  console.log("debug_deploy: " +
 const debug_rs   = (msg) => { if (debug_replicasets) console.log("debug_replicaset: " + msg); }
 const debug_pod  = (msg) => { if (debug_pods)     console.log("debug_pod: " + msg); }
 const debug_connect = (msg) => { if (debug_connects) console.log("debug_connect: " + msg); }
+const debug_color   = (msg) => { if (debug_colors)   console.log("debug_color: " + msg); }
 
 //const debug_loops=1;
 //const debug_loops=0;
@@ -119,6 +121,7 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
     if (fg != undefined) { color_style+='color: ' + fg + ';'; }
     if (bg != undefined) { color_style+='background-color: ' + bg + ';'; }
 
+    debug_color(`fg: ${fg} bg:${bg}`);
     itemSeenIdx = indexOfUIDInList(ids_seen, uid);
     if (itemSeenIdx != -1) {
         die("id seen already: " + uid);
@@ -175,6 +178,7 @@ const detectChanges = () => {
     });
     pods.forEach( (pod, index) => {
         configHash += pod.metadata.uid
+        configHash += pod.status.phase
     // todo state ??:
     });
 
@@ -397,8 +401,10 @@ const createReplicaSetDiv = (object) => {
     if (replicas == 0) {
         fg='black';
         bg='gray';
+        debug_color(`[rs replicas=0] fg: ${fg} bg:${bg}`);
         objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip, fg, bg);
     } else {
+        debug_color(`[rs replicas=${replicas}] fg: undefined, bg: undefined`);
         objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip);
     }
 
@@ -489,9 +495,9 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         nodeDivText[index]+='<i>' + name + '</i>';
         tooltip=''
         nodeDivText[index] = startElemDiv("node", node, nodeDivText[index], x, y, tooltip);
-        if (index != masterIdx) {
-            nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />'; /* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
-        }
+        //if (index != masterIdx) {
+        nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />'; /* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
+        //}
 
         // Used for correct pod placement on a row:
         node.lastPodImage=undefined;
@@ -629,17 +635,20 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
              // color based on style, label color or version ...
              fg='black';
              if ((image.indexOf(":1") != -1) || (image.indexOf(":v1") != -1)) {
-                 bg='#0f0';
+                 bg='#4f4';
 	     } else if ((image.indexOf(":2") != -1) || (image.indexOf(":v2") != -1)) {
-                 bg='#aa0';
+                 bg='#aa4';
 	     } else if ((image.indexOf(":3") != -1) || (image.indexOf(":v3") != -1)) {
-                 bg='#0b0';
+                 bg='#4b4';
 	     } else if ((image.indexOf(":4") != -1) || (image.indexOf(":v4") != -1)) {
-                 bg='#0b8';
+                 bg='#4b8';
 	     } else if ((image.indexOf(":5") != -1) || (image.indexOf(":v5") != -1)) {
-                 bg='#08b';
+                 bg='#48b';
+	     } else if (image.indexOf(":latest") != -1) {
+                 fg='green';
+                 bg='#4a4';
              } else {
-                 bg='#00f';
+                 bg='#44f';
              }
          } else if ( pod.status.phase == "Error" ) {
              fg='red';
@@ -657,6 +666,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
              bg='pink';
          }
 
+         debug_color(`[image ${image}][${pod.status.phase}] fg: ${fg} bg:${bg}`);
          nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
          debug_pod(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
 
