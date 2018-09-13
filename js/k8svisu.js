@@ -20,13 +20,16 @@ const debug_services=false;
 const debug_deploys=false;
 const debug_replicasets=false;
 const debug_pods=false;
-const debug_connect=true;
+const debug_connects=true;
+const enable_connects=false; // Needs placement debugging !
 
+const debug_log  = (msg) => { if (debug)          console.log("debug: " + msg); }
 const debug_node = (msg) => { if (debug_nodes)    console.log("debug_node: " + msg); }
 const debug_svc  = (msg) => { if (debug_services) console.log("debug_service: " + msg); }
 const debug_dep  = (msg) => { if (debug_deploys)  console.log("debug_deploy: " + msg); }
 const debug_rs   = (msg) => { if (debug_replicasets) console.log("debug_replicaset: " + msg); }
 const debug_pod  = (msg) => { if (debug_pods)     console.log("debug_pod: " + msg); }
+const debug_connect = (msg) => { if (debug_connects) console.log("debug_connect: " + msg); }
 
 //const debug_loops=1;
 //const debug_loops=0;
@@ -91,17 +94,17 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
     if (include_type) {
         if (type == 'node') {
             type_info="Node: ";
-	} else if (type == 'service') {
+        } else if (type == 'service') {
             type_info="Svc: ";
-	} else if (type == 'deployment') {
+        } else if (type == 'deployment') {
             type_info="Dep: ";
-	} else if (type == 'replicaset') {
+        } else if (type == 'replicaset') {
             type_info="Rs: ";
-	} else if (type == 'pod') {
+        } else if (type == 'pod') {
             type_info="";
-	} else {
+        } else {
             type_info=capitalize1stChar(type)+': ';
-	}
+        }
     }
 
     const uid=object.metadata.uid;
@@ -124,22 +127,22 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
 
     //const stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
     if (color_style == '') {
-        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" > ${type_info}${text}`;
+        stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" > ${type_info}${text}`;
     } else {
-        stElemDiv=`<div class="${classes} tooltip" data-tip="${tooltip}" id="${uid}" style="${color_style}" > ${type_info}${text}`;
+        stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" style="${color_style}" > ${type_info}${text}`;
     }
 
 
-    if (type == 'node' && debug_node) {
-        console.log(stElemDiv+' </div>');
-    } else if (type == 'service' && debug_svc) {
-        console.log(stElemDiv+' </div>');
-    } else if (type == 'deployment' && debug_dep) {
-        console.log(stElemDiv+' </div>');
-    } else if (type == 'replicaset' && debug_rs) {
-        console.log(stElemDiv+' </div>');
-    } else if (type == 'pod' && debug_pod) {
-        console.log(stElemDiv+' </div>');
+    if (type == 'node') {
+        debug_node(stElemDiv+' </div>');
+    } else if (type == 'service') {
+        debug_svc(stElemDiv+' </div>');
+    } else if (type == 'deployment') {
+        debug_dep(stElemDiv+' </div>');
+    } else if (type == 'replicaset') {
+        debug_rs(stElemDiv+' </div>');
+    } else if (type == 'pod') {
+        debug_pod(stElemDiv+' </div>');
     } else {
         if (debug) { console.log(stElemDiv+' </div>'); }
     }
@@ -298,8 +301,8 @@ const changeNamespace = () => {
     var selectedValue = selectBox.options[selectBox.selectedIndex].value;
     namespace = selectedValue;
 
-    console.log(window.namespace);
-    console.log(namespace);
+    debug_log(window.namespace);
+    debug_log(namespace);
 
     // force cluster update:
     getClusterState();
@@ -311,7 +314,7 @@ const buildNamespaceMenu = (namespaces) => {
     let nsMenu='<select class="col dropbtn" id="nsmenu" onchange="changeNamespace();" >';
 
     namespaces.forEach( (option_namespace, index) => {
-        //console.log(`option_namespace[${index}]: ${option_namespace.metadata.name}`);
+        //debug_log(`option_namespace[${index}]: ${option_namespace.metadata.name}`);
         let selected='';
         if (option_namespace.metadata.name == namespace) {
             selected=' selected="selected"';
@@ -335,14 +338,14 @@ const getMasterIndex = (nodes) => {
             role = 'master';
             masterIdx=index;
             master=nodes[index];
-            //console.log("MASTER=" + index);
+            //debug_log("MASTER=" + index);
         }
     });
 
     if (masterIdx == undefined) {
         console.log("Failed to detect Master node");
     }
-    // console.log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
+    // debug_log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
 
     return [masterIdx, master.metadata.name];
 };
@@ -352,13 +355,13 @@ const getNodeIndex = (nodes, nodeName) => {
 
     nodes.forEach( (node, index) => {
         if (node.metadata.name == nodeName) {
-            //console.log(`${node.metadata.name} == ${nodeName}`);
+            //debug_log(`${node.metadata.name} == ${nodeName}`);
             nodeIndex = index;
         }
-        //console.log(`${node.metadata.name} != ${nodeName}`);
+        //debug_log(`${node.metadata.name} != ${nodeName}`);
     });
 
-    //console.log(nodeIndex);
+    //debug_log(nodeIndex);
     if (nodeIndex != -1) {
         return nodeIndex;
     }
@@ -444,9 +447,9 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
     runningButton.addEventListener('click', (e) => {
         pause_visu = !pause_visu;
         if (pause_visu) {
-            console.log("Visualization paused");
+            debug_log("Visualization paused");
         } else {
-            console.log("Visualization restarted");
+            debug_log("Visualization restarted");
             setTimeout(getClusterState, getClusterState_timeout);
         };
     });
@@ -454,9 +457,9 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
     showKubeCompButton.addEventListener('click', (e) => {
         show_kube_components = !show_kube_components;
         if (show_kube_components) {
-            console.log("Show Kubernetes Components");
+            debug_log("Show Kubernetes Components");
         } else {
-            console.log("Hide Kubernetes Components");
+            debug_log("Hide Kubernetes Components");
         };
      });
 
@@ -467,7 +470,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
     const retList = getMasterIndex(nodes);
     let masterIdx = retList[0];
     let masterNode = retList[1];
-    console.log(`MASTER=node[${masterIdx}]=${masterNode}'`);
+    debug_node(`MASTER=node[${masterIdx}]=${masterNode}'`);
 
     nodes.forEach( (node, index)      => {
         //let y=1000*index;
@@ -487,7 +490,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         tooltip=''
         nodeDivText[index] = startElemDiv("node", node, nodeDivText[index], x, y, tooltip);
         if (index != masterIdx) {
-	    nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />'; /* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
+            nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />'; /* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
         }
 
         // Used for correct pod placement on a row:
@@ -513,10 +516,8 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
             node_port=undefined;
             service.spec.ports.forEach( (port, index) => {
                 ports_info+=$.param( port, true);
-		if (port.nodePort) {
-                    node_port=port.nodePort;
-		}
-	    });
+                if (port.nodePort) { node_port=port.nodePort; }
+            });
 
             tooltip=`${ports_info}  ${labels}`;
             svcDiv = '';
@@ -525,7 +526,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
             label = service.metadata.name;
             if (node_port != undefined) {
                 label += '[' + node_port + ']';
-	    }
+            }
             svcDiv += createElemDiv("service", service, label, x, y, tooltip);
             deployments.forEach( (deployment, index) => {
                 if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
@@ -544,9 +545,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                                         //svcDiv += '<div class="col">';
                                         replicasets_seen.push( replicaset.metadata.uid );
                                         svcDiv += createReplicaSetDiv(replicaset);
-                                        if (debug_svc) {
-                                            console.log(`${replicaset.metadata.name}: [${replicaset.spec.replicas}] ${deployment.metadata.name} == ${owner.name}`);
-					}
+                                        debug_svc(`${replicaset.metadata.name}: [${replicaset.spec.replicas}] ${deployment.metadata.name} == ${owner.name}`);
                                     }
                                });
                          }
@@ -558,9 +557,8 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
             svcDiv += '</div>';
             svcDiv += '<br/>';
             services_info+=svcDiv;
-            console.log(`services_info='${services_info}'`);
-
-            console.log(`service[${index}]: ${service.metadata.name}`);
+            debug_svc(`services_info='${services_info}'`);
+            debug_svc(`service[${index}]: ${service.metadata.name}`);
         }
      } );
      nodeDivText[masterIdx]+=services_info;
@@ -572,10 +570,10 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          let x=110; //100*index;
 
          itemSeenIdx = indexOfUIDInList(deploys_seen, deployment.metadata.uid);
-     console.log(`${itemSeenIdx} ${deployment.metadata.uid}`);
-     //console.log(`${itemSeenIdx} ` + $.param( deployment.metadata, true));
+         debug_dep(`${itemSeenIdx} ${deployment.metadata.uid}`);
+         //debug_dep(`${itemSeenIdx} ` + $.param( deployment.metadata, true));
 
-     if (itemSeenIdx == -1) {
+         if (itemSeenIdx == -1) {
              if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
                  services.forEach( service => {
                      if (service.metadata.name == deployment.metadata.name) {
@@ -587,7 +585,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                  deploys_info+=createDeploymentDiv(deployment);
              }
          }
-        // console.log(`deployment[${index}]: ${deployment.metadata.name}`);
+        // debug_dep(`deployment[${index}]: ${deployment.metadata.name}`);
      } );
      nodeDivText[masterIdx]+=deploys_info;
 
@@ -600,35 +598,26 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          lastreplicaset=replicaset;
 
          itemSeenIdx = indexOfUIDInList(replicasets_seen, replicaset.metadata.uid);
-     if (itemSeenIdx == -1) {
+         if (itemSeenIdx == -1) {
              if (show_kube_components || (replicaset.metadata.name != 'kubernetes')) {
-             //deployments.forEach( deployment => {
-                 //if (deployment.metadata.name == replicaset.metadata.name) {
-                     //x = deployment.x + 180; replicaset.x = x;
-                     //y = deployment.y + 50;  replicaset.y = y;
-                     ////!! no break;
-                 //}
-             //})
-
                  replicasets_info += createReplicaSetDiv(replicaset);
-                 //console.log(replicaset);
              }
          }
-         // console.log(`replicaset[${index}]: ${replicaset.metadata.name}`);
+         // debug_rs(`replicaset[${index}]: ${replicaset.metadata.name}`);
      } );
      nodeDivText[masterIdx]+=replicasets_info;
 
      x = 0;
      y = 0;
 
-     console.log(`#pods=${pods.length}`);
+     debug_pod(`#pods=${pods.length}`);
      pods.forEach( (pod, index) => {
-         if (debug_pod) { console.log(`pod[${index}]: ${pod.metadata.name}`); }
+         debug_pod(`pod[${index}]: ${pod.metadata.name}`);
          podText = pod.metadata.name;
          x += 100;
          loop++;
 
-         if (debug_pod) { console.log( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` ); }
+         debug_pod( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` );
 
          tooltip='';
 
@@ -638,39 +627,45 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          // pod.status.phase = "Error";
          if ( pod.status.phase == "Running" ) {
              // color based on style, label color or version ...
-             fg=undefined;
-             if (image.indexOf("v1") != -1) {
+             fg='black';
+             if ((image.indexOf(":1") != -1) || (image.indexOf(":v1") != -1)) {
+                 bg='#0f0';
+	     } else if ((image.indexOf(":2") != -1) || (image.indexOf(":v2") != -1)) {
                  bg='#aa0';
-         } else if (image.indexOf("v2") != -1) {
-                 bg='#aa0';
-         } else if (image.indexOf("v3") != -1) {
-                 bg='#0aa';
-         } else if (image.indexOf("v4") != -1) {
-                 bg='#0a0';
-         } else if (image.indexOf("v5") != -1) {
-                 bg='#00a';
-         } else {
-                 bg='#660';
-         }
+	     } else if ((image.indexOf(":3") != -1) || (image.indexOf(":v3") != -1)) {
+                 bg='#0b0';
+	     } else if ((image.indexOf(":4") != -1) || (image.indexOf(":v4") != -1)) {
+                 bg='#0b8';
+	     } else if ((image.indexOf(":5") != -1) || (image.indexOf(":v5") != -1)) {
+                 bg='#08b';
+             } else {
+                 bg='#00f';
+             }
          } else if ( pod.status.phase == "Error" ) {
              fg='red';
              bg='pink';
+         } else if ( pod.status.phase == "Pending" ) {
+             fg='black';
+             bg='orange';
+         } else if ( pod.status.phase == "Container Creating" ) {
+             fg='black';
+             bg='yellow';
          } else {
-             // Pending, Container Creating
+             // ????
+             console.log(`Unknown ${pod.status.phase} seen`);
              fg='orange';
+             bg='pink';
          }
 
          nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
-         if (debug_pod) {
-             console.log(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
-         }
+         debug_pod(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
 
          classes="pod"
          if (nodes[nodeIndex].lastPodImage == undefined) {
             classes += " row";
-	 } else if (nodes[nodeIndex].lastPodImage == image) {
+         } else if (nodes[nodeIndex].lastPodImage == image) {
             classes += " col";
-	 }
+         }
          podDiv = createElemDiv(classes, pod, podText, x, y, tooltip, fg, bg);
 
          nodes[nodeIndex].lastPodImage=image;
@@ -690,9 +685,9 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      }
 
      if (pause_visu) {
-         console.log('NO timeout set - stopping');
+         debug_log('NO timeout set - stopping');
      } else {
-         console.log(`setTimeout=${getClusterState_timeout}`);
+         debug_log(`setTimeout=${getClusterState_timeout}`);
          setTimeout(getClusterState, getClusterState_timeout);
      }
 };
@@ -700,7 +695,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 const initialLoad = () => {
     // Initial jsPlumb load
 
-    if (debug) { console.log("LOAD @ " + jQuery.now()); }
+    debug_log("LOAD @ " + jQuery.now());
     jsPlumb.reset();
 
     let instance = jsPlumb.getInstance({
@@ -717,22 +712,39 @@ const redrawAll = (info) => {
     // When changes are detected, redraw cluster:
 
     $("#cluster").empty();
-    if (debug) { console.log("redrawAll @ " + jQuery.now()); }
+    debug_log("redrawAll @ " + jQuery.now());
 
     $('#cluster').append(info);
+    if (! enable_connects) {
+        return;
+    }
+
+    // Connect pods to their ReplicaSet:
     pods.forEach( (pod, index) => {
         owners = pod.metadata.ownerReferences;
         owners.forEach( (owner, index) => {
 
-            if (debug_connect) {
-                // console.log( $.param( owner, true) );
-                console.log(`jsPlumb.connect( source[pod/${pod.metadata.name}]: ${pod.metadata.uid}, target[${owner.kind}/${owner.name}]: ${owner.uid} );`);
+            //ownerReference
+            //[{ apiVersion: 'apps/v1', kind: 'Deployment', name: 'redis', uid: 'f8134aa4-b534-11e8-8a06-525400c9c704', controller: true, blockOwnerDeletion: true }]
+            // debug_connect( $.param( owner, true) );
+            debug_connect(`jsPlumb.connect( source[pod/${pod.metadata.name}]: ${pod.metadata.uid}, target[${owner.kind}/${owner.name}]: ${owner.uid} );`);
 
-	        //ownerReference
-	        //[{ apiVersion: 'apps/v1', kind: 'Deployment', name: 'redis', uid: 'f8134aa4-b534-11e8-8a06-525400c9c704', controller: true, blockOwnerDeletion: true }]
-            }
+            var common = {                                                                               
+                connector: ["Straight"],                                                                 
+                //anchor: ["Left", "Right"],                                                               
+                endpoint:"Dot",                                                                          
+                                                                                                                     
+                paintStyle:{ stroke:"darkblue", strokeWidth:1,  },                                      
+                endpointStyle:{ fill:"darkblue", outlineStroke:"darkblue", strokeWidth:0, outlineWidth:0 },           
+                                                                                                                     
+                //overlays:[ ["Arrow" , { width:12, length:12, location:0.67 }] ],                         
+                };                                                                                           
 
             jsPlumb.connect({
+                source: pod.metadata.uid,
+                target: owner.uid,}, common);
+
+            /*jsPlumb.connect({
                 source: pod.metadata.uid,
                 target: owner.uid,
                 anchors: ["Bottom", "Bottom"],
@@ -740,7 +752,7 @@ const redrawAll = (info) => {
                 joinStyle: "round",
                 endpointStyle: {fillStyle: 'blue', radius: 7},
                 connector: ["Flowchart", {cornerRadius: 5}]
-            });
+            });*/
         });
     });
 
