@@ -11,21 +11,30 @@ press() {
     [ "$DUMMY" = "Q" ] && exit 0
 }
 
-kubectl get all
-press "About to delete all deplyments/replicasets/pods:"
 
-kubectl delete -f yaml/flask-service.yaml 2>/dev/null
-kubectl delete -f yaml/k8sdemo-service.yaml 2>/dev/null
-kubectl delete -f yaml/redis-service.yaml 2>/dev/null
-kubectl delete -f yaml/flask-deployment.yaml 2>/dev/null
-kubectl delete -f yaml/k8sdemo-deployment.yaml 2>/dev/null
-kubectl delete -f yaml/redis-deployment.yaml 2>/dev/null
+delete_all_kubernetes_entities() {
+    kubectl get all
+    press "About to delete all deplyments/replicasets/pods:"
 
-kubectl get all
+    kubectl delete -f yaml/flask-service.yaml 2>/dev/null
+    kubectl delete -f yaml/k8sdemo-service.yaml 2>/dev/null
+    kubectl delete -f yaml/redis-service.yaml 2>/dev/null
+    kubectl delete -f yaml/flask-deployment.yaml 2>/dev/null
+    kubectl delete -f yaml/k8sdemo-deployment.yaml 2>/dev/null
+    kubectl delete -f yaml/redis-deployment.yaml 2>/dev/null
 
-if [ "$1" = "--delete-images" ];then
+    kubectl get all
+}
+
+remove_all_images() {
     cd $VAGRANT_DIR
     pwd
+
+    # QUICK AND DIRTY:
+    vagrant ssh node1 -- sudo docker rmi mjbright/flask-web:v1 mjbright/flask-web:v2 mjbright/flask-web:v3 redis
+    vagrant ssh node2 -- sudo docker rmi mjbright/flask-web:v1 mjbright/flask-web:v2 mjbright/flask-web:v3 redis
+    return
+
 
     VAGRANT_NODES=$(vagrant status | awk '/ running / { print $1; }')
     [ -z "$VAGRANT_NODES" ] && {
@@ -34,9 +43,17 @@ if [ "$1" = "--delete-images" ];then
     }
 
     for NODE in $VAGRANT_NODES; do
-        echo "-- BEFORE: Images on $NODE"
-        vagrant ssh $NODE -- "sudo docker images | awk '/^$IMAGE_PREFIX/ { print \$1; };'"
-        vagrant ssh $NODE -- "sudo docker rmi \$(sudo docker images | awk '/^$IMAGE_PREFIX/ { print \$1:\$2; };')"
+        [ "$NODE" = "master" ] && { echo "Skipping Master node"; continue; }
+
+        echo "-- BEFORE: Images [matching $IMAGE_PREFIX] on $NODE"
+
+	press "LIST IMAGES:"
+        vagrant ssh $NODE -- "sudo docker images | awk '/^$IMAGE_PREFIX/ { print \\"\$1:\$2\\"; };'"
+
+	press "REMOVE IMAGE VERSIONS:"
+        vagrant ssh $NODE -- "sudo docker rmi \$(sudo docker images | awk '/^$IMAGE_PREFIX/ { print \"\$1\:\$2\"; };')"
+
+	press "REMOVE IMAGES without version:"
         vagrant ssh $NODE -- "sudo docker rmi \$(sudo docker images | awk '/^$IMAGE_PREFIX/ { print \$1; };')"
     done
 
@@ -47,7 +64,14 @@ if [ "$1" = "--delete-images" ];then
 
     done
     vagrant status
+}
 
+delete_all_kubernetes_entities
+
+#remove_all_images
+
+if [ "$1" = "--delete-images" ];then
+    remove_all_images
 fi
 
 exit 1
