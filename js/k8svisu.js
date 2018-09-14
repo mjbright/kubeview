@@ -42,8 +42,8 @@ const debug_color   = (msg) => { if (debug_colors)   console.log("debug_color: "
 //const debug_loops=1;
 //const debug_loops=0;
 //var debug_loops=1;
-var pause_visu=false;
-var show_kube_components=false;
+var pause_visu={ state: false };
+var show_kube_components={ state: false };
 const debug_timing=false;
 
 // Include type prefix in displayed element names, e.g. 'Service: <service-name>':
@@ -430,53 +430,58 @@ const indexOfUIDInList = (idlist, id) => {
     return (foundIdx);
 };
 
-const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
+const createCheckBoxText = (id, value, label, checkState) => {
+    let checked='';
+    if (checkState) { checked="checked='checked'"; }
 
+    let buttonDivText=`<div class="col"><input type="checkbox" id="${id}" name="${id}"${checked} value="${value}" /> <label for="${value}">${label}</label></div>`;
+    /*let showKubeCompButtonText='<div class="col">' +
+        '<input type="checkbox" id="show_kubernetes" name="show_kubernetes" ' + checked + ' value="show_all" />' +
+        '<label for="show_all">Show Kubernetes components</label>' +
+      '</div>';*/
+
+    return buttonDivText;
+};
+
+const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
+    let button = document.querySelector(`#${id}`);
+
+    button.addEventListener('click', (e) => {
+        checkState_obj.state = !checkState_obj.state;
+        debug_log(`Button ${id} clicked, '${label}' state now: ${checkState_obj.state}`);
+	handler(id, label, checkState_obj);
+    });
+};
+
+const startPage = () => {
     //----- Build up namespace dropdown menu:
     const nsMenu = buildNamespaceMenu(namespaces);
 
     // TODO: Add modals as prettier tooltips ..
-    let checked='';
+	//
+    let runningButtonText = createCheckBoxText( "run_or_pause", "Pause", "Pause", pause_visu.state);
 
-    if (!pause_visu) { checked="checked='checked'"; }
-    let runningButtonText='<div class="col">' +
-        '<input type="checkbox" id="run_or_pause" name="run_or_pause" ' + checked + ' value="Run" />' +
-        '<label for="Run">Run</label>' +
-      '</div>';
 
-    checked='';
-    if (show_kube_components) { checked="checked='checked'"; }
-    let showKubeCompButtonText='<div class="col">' +
-        '<input type="checkbox" id="show_kubernetes" name="show_kubernetes" ' + checked + ' value="show_all" />' +
-        '<label for="show_all">Show Kubernetes components</label>' +
-      '</div>';
+    let showKubeCompButtonText = createCheckBoxText( "show_kubernetes", "show_all", "Show Kubernetes components", show_kube_components.state);
 
-    let toplineMenu='<div><div class="row" ><b>Namespace:</b> </div> <div class="col" >' + nsMenu + '</div> ' +
-            runningButtonText + showKubeCompButtonText + ';&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ' + sourceURL + ' </div>';
+    let toplineMenu=`<div><div class="row" ><b>Kubernetes ${kube_version}</b>, <b>Namespace:</b> </div> <div class="col" > ${nsMenu} </div>
+            ${runningButtonText} ${showKubeCompButtonText} &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${sourceURL} </div>`;
 
     $('#k8s_namespace').empty();
     $('#k8s_namespace').append(toplineMenu);
 
-    let runningButton = document.querySelector('#run_or_pause');
-    let showKubeCompButton = document.querySelector('#show_kubernetes');
-    runningButton.addEventListener('click', (e) => {
-        pause_visu = !pause_visu;
-        if (pause_visu) {
-            debug_log("Visualization paused");
-        } else {
-            debug_log("Visualization restarted");
+    addCheckBoxHandler("run_or_pause", "Pause", pause_visu,
+        (id, label, checkState) => {
             setTimeout(getClusterState, getClusterState_timeout);
-        };
-    });
+	});
 
-    showKubeCompButton.addEventListener('click', (e) => {
-        show_kube_components = !show_kube_components;
-        if (show_kube_components) {
-            debug_log("Show Kubernetes Components");
-        } else {
-            debug_log("Hide Kubernetes Components");
-        };
-     });
+    addCheckBoxHandler("show_kubernetes", "Show Kubernetes components", show_kube_components,
+        (id, label, checkState) => { getClusterState(); });
+};
+
+const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
+
+    startPage();
 
     var nodeDivText=[];
 
@@ -522,7 +527,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         let x=10; //100*index;
 
         service.x = x; service.y = y;
-        if (show_kube_components || (service.metadata.name != 'kubernetes')) {
+        if (show_kube_components.state || (service.metadata.name != 'kubernetes')) {
             labels=getLabelsAnnotations(service);
 
             // spec: { ports: [ { protocol: 'TCP', port: 5000, targetPort: 5000, nodePort: 31896 } ],
@@ -543,7 +548,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
             }
             svcDiv += createElemDiv("service", service, label, x, y, tooltip);
             deployments.forEach( (deployment, index) => {
-                if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
+                if (show_kube_components.state || (deployment.metadata.name != 'kubernetes')) {
                     if (service.metadata.name == deployment.metadata.name) {
                         //svcDiv += '<div class="col">';
                         deploys_seen.push( deployment.metadata.uid );
@@ -552,7 +557,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
                         // replicaset.metadata.ownerReferences.name: flask-app (Deployment)
                         replicasets.forEach( (replicaset, index) => {
-                            if (show_kube_components || (replicaset.metadata.name != 'kubernetes')) {
+                            if (show_kube_components.state || (replicaset.metadata.name != 'kubernetes')) {
                                 owners = replicaset.metadata.ownerReferences;
                                 owners.forEach( (owner) => {
                                     if (deployment.metadata.name == owner.name) {
@@ -588,7 +593,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          //debug_dep(`${itemSeenIdx} ` + $.param( deployment.metadata, true));
 
          if (itemSeenIdx == -1) {
-             if (show_kube_components || (deployment.metadata.name != 'kubernetes')) {
+             if (show_kube_components.state || (deployment.metadata.name != 'kubernetes')) {
                  services.forEach( service => {
                      if (service.metadata.name == deployment.metadata.name) {
                          //x = service.x + 180; deployment.x = x;
@@ -613,7 +618,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          itemSeenIdx = indexOfUIDInList(replicasets_seen, replicaset.metadata.uid);
          if (itemSeenIdx == -1) {
-             if (show_kube_components || (replicaset.metadata.name != 'kubernetes')) {
+             if (show_kube_components.state || (replicaset.metadata.name != 'kubernetes')) {
                  replicasets_info += createReplicaSetDiv(replicaset);
              }
          }
@@ -703,7 +708,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          redrawAll(ALL_info);
      }
 
-     if (pause_visu) {
+     if (pause_visu.state) {
          debug_log('NO timeout set - stopping');
      } else {
          debug_log(`setTimeout=${getClusterState_timeout}`);
