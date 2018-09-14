@@ -12,6 +12,8 @@ let ids_seen = [];
 let configHash='';
 let force_redraw=false;
 
+let getversion=true; /* Once only */
+
 let kube_version=undefined;
 
 //-- Constant definitions: ----------------------------------------------------
@@ -250,6 +252,13 @@ const getClusterState = () => {
     pods = [];
     services = [];
 
+    if ( getversion ) {
+        const versionReq = $.getJSON(version_path, (obj) => {
+            kube_version=obj.gitVersion; });
+        requests.push(versionReq);
+        getversion=false; /* Once only */
+	console.log("GOT VERSION");
+    }
     if ( getnodes ) {
         const nodesReq = $.getJSON(nodes_path, (obj) => {
             if (obj.items == undefined) { return; }
