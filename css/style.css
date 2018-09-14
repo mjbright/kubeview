@@ -6,18 +6,31 @@
 
 .node {
     border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
-    border-color: var(--node-border-color);
+    border-color: var(--sched-node-border-color);
 
     padding: 5px;
+    margin: 10px;
     font-size: 20px;
 
-    background: var(--node-bg-color);
-    color: var(--node-fg-color);
+    background: var(--sched-node-bg-color);
+    color: var(--sched-node-fg-color);
 
     /* Adapt size to content: */
     /* width: 200px; height: 150px; */
     /* width: max-content; height: max-content; */
     width: 100%; height: max-content;
+}
+
+.notready {
+    border-color: var(--notready-border-color);
+    background: var(--notready-bg-color);
+    color: var(--notready-fg-color);
+}
+
+.unsched {
+    border-color: var(--unsched-node-border-color);
+    background: var(--unsched-node-bg-color);
+    color: var(--unsched-node-fg-color);
 }
 
 .service {

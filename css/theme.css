@@ -10,8 +10,20 @@
     --title-left-color:  grey;
     --title-right-color: white;
 
-    --node-bg-color: rgba(80, 120, 180, 0.1);
-    --node-fg-color: rgb(80, 120, 180);
+    /* Default color: for schedulable nodes - works, tainted masters */
+    --sched-node-bg-color: rgba(80, 180, 120, 0.1);
+    --sched-node-fg-color: rgb(80, 180, 120);
+    --sched-node-border-color: rgb(80, 180, 120);
+
+    /* Color: for (untainted) masters */
+    --unsched-node-bg-color: rgba(40, 80, 180, 0.1);
+    --unsched-node-fg-color: rgb(40, 80, 180);
+    --unsched-node-border-color: rgb(40, 80, 180);
+
+    /* Color: for NotReady nodes */
+    --notready-bg-color: rgba(180, 120, 80, 0.1);
+    --notready-fg-color: rgb(180, 120, 80);
+    --notready-border-color: rgb(180, 120, 80);
 
     --service-bg-color: rgb(180,180, 40);
     --service-fg-color: white;
