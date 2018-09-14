@@ -109,11 +109,11 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
         if (type == 'node') {
             type_info="Node: ";
         } else if (type == 'service') {
-            type_info="Svc: ";
+            type_info="Service: ";
         } else if (type == 'deployment') {
             type_info="Dep: ";
         } else if (type == 'replicaset') {
-            type_info="Rs: ";
+            type_info="RS: ";
         } else if (type == 'pod') {
             type_info="";
         } else {
@@ -123,11 +123,12 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
 
     const uid=object.metadata.uid;
     const name=object.metadata.name;
-    if (tooltip != '') {
-        tooltip=`${name}[uid:${uid}] ` + tooltip;
-    } else {
-        tooltip=`${name}[uid:${uid}]`;
-    }
+    tooltip=`${type}
+    ${name}
+    
+    [uid:${uid}]
+
+${tooltip}`;
 
     color_style=''
     if (fg != undefined) { color_style+='color: ' + fg + ';'; }
@@ -140,13 +141,18 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
     }
     ids_seen.push( uid );
 
-    //const stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
-    if (color_style == '') {
-        stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" > ${type_info}${text}`;
-    } else {
-        stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" style="${color_style}" > ${type_info}${text}`;
+    classes += " tooltip";
+    let datatip = ` data-tip=""`;
+    if ( enable_tooltips.state ) {
+        datatip = ` data-tip="${tooltip}"`;
     }
 
+    //const stElemDiv=`<div id="${uid}" class="${classes} tooltip" data-tip="${tooltip}" style="left: ${x};top: ${y};${color_style}" > ${type_info}${text}`;
+    if (color_style == '') {
+        stElemDiv=`<div id="${uid}" class="${classes}" ${datatip} > ${type_info}${text}`;
+    } else {
+        stElemDiv=`<div id="${uid}" class="${classes}" ${datatip} style="${color_style}" > ${type_info}${text}`;
+    }
 
     if (type == 'node') {
         debug_node(stElemDiv+' </div>');
@@ -210,7 +216,32 @@ const detectChanges = () => {
     return true;
 };
 
-const getLabelsAnnotations = (object) => {
+const getHTMLLabelsAnnotations = (object) => {
+    let retStr='';
+
+    retStr += '<ul>';
+
+    if (object.metadata.labels) {
+        retStr += `<h3>Labels</h3>`;
+        Object.keys(object.metadata.labels).forEach( (key, index) => {
+            value = object.metadata.labels[key];
+            retStr += `<li>${key} - ${value}</li>`;
+	});
+    }
+
+    if (object.metadata.annotations) {
+        retStr += `<h3>Annotations</h3>`;
+        Object.keys(object.metadata.annotations).forEach( (key, index) => {
+            value = object.metadata.annotations[key];
+            retStr += `<li>${key} - ${value}</li>`;
+	});
+    }
+
+    retStr += '</ul>';
+    return retStr;
+};
+
+const getLabelsAnnotations = (object, html) => {
     let retStr='';
 
     // console.log( $.param( object.metadata.labels, true) );
@@ -401,16 +432,58 @@ const getNodeIndex = (nodes, nodeName) => {
 
 const createDeploymentDiv = (object) => {
     let replicas=`${object.status.readyReplicas}/${object.spec.replicas}`;
+    let replicasForModal=`${object.status.readyReplicas} present/${object.spec.replicas} desired`;
     let objectText=`${object.metadata.name} [${replicas}]`;
     if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
 
-    let labels=getLabelsAnnotations(object);
-    let tooltip=`${labels}`;
+    //let labels=getLabelsAnnotations(object);
+    //let tooltip=`${labels}`;
+    let tooltip='';
     let x=0;
     let y=0;
 
-    objectDiv = createElemDiv("deployment col", object, objectText, x, y, tooltip);
-    return objectDiv;
+    const objectDiv = createElemDiv("deployment col", object, objectText, x, y, tooltip);
+    //return objectDiv;
+    const content=`
+		<ul>
+		<li>Replicas: ${replicasForModal}</li>
+		</ul>
+		`;
+    const modalDiv = createModalText('Deployment', object, objectDiv, object.metadata.uid, content)
+    return modalDiv;
+};
+
+const createServiceDiv = (object) => {
+    // spec: { ports: [ { protocol: 'TCP', port: 5000, targetPort: 5000, nodePort: 31896 } ],
+    ports_info='PORTS: ';
+    node_port=undefined;
+    object.spec.ports.forEach( (port, index) => {
+        ports_info+=$.param( port, true);
+        if (port.nodePort) { node_port=port.nodePort; }
+    });
+
+    let objectText=`${object.metadata.name}`;
+    if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run}`; }
+    //if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
+
+    //let labels=getLabelsAnnotations(object);
+    let tooltip="";
+    let x=0;
+    let y=0;
+
+    if (node_port != undefined) {
+        objectText += ' [NodePort: ' + node_port + ']';
+        tooltip += `NodePort: ${node_port}`;
+    }
+    objectDiv = '<div>';
+    //objectDiv = '';
+    objectDiv += createElemDiv("service", object, objectText, x, y, tooltip);
+    content='';
+    modalDiv = createModalText('Service', object, objectDiv, objectText, content);
+    //modalDiv += '</div>';
+    //svcDiv += createElemDiv("service", object, label, x, y, tooltip);
+
+    return modalDiv;
 };
 
 const createReplicaSetDiv = (object) => {
@@ -418,8 +491,16 @@ const createReplicaSetDiv = (object) => {
     let objectText=`${object.metadata.name}[${replicas}]`;
     if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
 
-    let labels=getLabelsAnnotations(object);
-    let tooltip=`${labels}`;
+    /* NOT DEFINED: const image=object.spec.containers[0].image;
+    const image_version=getImageVersion(object);
+
+    if (object.metadata.labels.run) {
+        let postfix=objectText.substr(objectText.lastIndexOf("-"));
+	objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
+    }*/
+
+    //let labels=getLabelsAnnotations(object);
+    let tooltip="";
     let x=0;
     let y=0;
 
@@ -433,7 +514,101 @@ const createReplicaSetDiv = (object) => {
         objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip);
     }
 
+    return objectDiv;
+};
 
+const getImageVersion = (object) => {
+    const image=object.spec.containers[0].image;
+
+    let image_version='';
+    if ((image.indexOf(":latest") == -1) && (image.indexOf(":") != -1)) {
+        image_version='['+image.substr( 1+image.lastIndexOf(":") )+']';
+    }
+
+    return image_version;
+};
+
+const getPodColors = (object, image, image_version) => {
+    let fg=undefined;
+    let bg=undefined;
+
+    // object.status.phase = "Error";
+    if ( object.status.phase == "Running" ) {
+        // color based on style, label color or version ...
+        fg='black';
+        if ((image.indexOf(":1") != -1) || (image.indexOf(":v1") != -1)) {
+            bg='#4f4';
+	} else if ((image.indexOf(":2") != -1) || (image.indexOf(":v2") != -1)) {
+            bg='#aa4';
+	} else if ((image.indexOf(":3") != -1) || (image.indexOf(":v3") != -1)) {
+            bg='#4b4';
+	} else if ((image.indexOf(":4") != -1) || (image.indexOf(":v4") != -1)) {
+            bg='#4b8';
+	} else if ((image.indexOf(":5") != -1) || (image.indexOf(":v5") != -1)) {
+            bg='#48b';
+	} else if (image.indexOf(":latest") != -1) {
+            fg='green';
+            bg='#4a4';
+        } else {
+            bg='#44f';
+        }
+    } else if ( object.status.phase == "Error" ) {
+        fg='red';
+        bg='pink';
+    } else if ( object.status.phase == "Pending" ) {
+        fg='black';
+        bg='orange';
+    } else if ( object.status.phase == "Container Creating" ) {
+        fg='black';
+        bg='yellow';
+    } else {
+        // ????
+        console.log(`Unknown ${object.status.phase} seen`);
+        fg='orange';
+        bg='pink';
+    }
+
+    debug_color(`[image ${image}][${object.status.phase}] fg: ${fg} bg:${bg}`);
+    debug_pod(`${object.metadata.name} is '${object.status.phase}' on node[${nodeIndex}] '${object.spec.nodeName}'`);
+    return [fg, bg];
+}
+
+
+const createPodDiv = (object) => {
+    let objectText=`${object.metadata.name}`;
+    const image=object.spec.containers[0].image;
+    const image_version=getImageVersion(object);
+
+    if (object.metadata.labels.run) {
+        let postfix=objectText.substr(objectText.lastIndexOf("-"));
+	objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
+    }
+
+    let tooltip="";
+    let x=0;
+    let y=0;
+
+    //x += 100;
+    loop++;
+
+    debug_pod( `${object.metadata.uid} - ${object.metadata.name} on ${object.spec.nodeName}` );
+
+    tooltip='';
+
+    colors = getPodColors(object, image, image_version);
+    fg=colors[0];
+    bg=colors[1];
+	console.log(`fg=${fg}`);
+
+    classes="pod"
+    if (nodes[nodeIndex].lastPodImage == undefined) {
+        classes += " row";
+    } else if (nodes[nodeIndex].lastPodImage == image) {
+        classes += " col";
+    }
+    nodes[nodeIndex].lastPodImage=image;
+
+    objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
     return objectDiv;
 };
 
@@ -467,6 +642,28 @@ const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
         debug_log(`Button ${id} clicked, '${label}' state now: ${checkState_obj.state}`);
 	handler(id, label, checkState_obj);
     });
+};
+
+const createModalText = (type, object, href_content, id, markup) => {
+
+    const labelsAnnotations = getHTMLLabelsAnnotations(object);
+    const content=`<h1>${type}: ${object.metadata.name}</h1>
+                 <h3>UID: ${object.metadata.uid}</h3>
+                ${labelsAnnotations}
+                ${markup}
+		`;
+
+    const modalText=`
+    <a class="modal_href" href="#${id}_modal">${href_content}</a>
+
+    <div id="${id}_modal" class="modalDialog">
+      <div>
+        <a href="#${id}_close_modal" title="Close" class="close">X</a>
+	${content}
+      </div>
+      </div>`;
+
+    return modalText;
 };
 
 const startPage = () => {
@@ -517,7 +714,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
     nodes.forEach( (node, index)      => {
         //let y=1000*index;
-        let y=0*index;
+        let y=0;
         let x=0; //100*index;
 
         nodeDivText[index]='';
@@ -580,7 +777,9 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                 classes += " unsched";
             }
         }
-        nodeDivText[index] = startElemDiv(classes, node, nodeDivText[index], x, y, tooltip);
+
+        stElemDiv = startElemDiv(classes, node, nodeDivText[index], x, y, tooltip);
+        nodeDivText[index] = stElemDiv;
         //if (index != masterIdx) {
 	/* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
         nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />';
@@ -595,32 +794,12 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
     services_info='';
     services.forEach( (service, index) => {
-        //let y=100+100*index;
-        //let y=100*index;
         let y=0;
-        let x=10; //100*index;
+        let x=10;
 
         service.x = x; service.y = y;
         if (show_kube_components.state || (service.metadata.name != 'kubernetes')) {
-            labels=getLabelsAnnotations(service);
-
-            // spec: { ports: [ { protocol: 'TCP', port: 5000, targetPort: 5000, nodePort: 31896 } ],
-            ports_info='PORTS: ';
-            node_port=undefined;
-            service.spec.ports.forEach( (port, index) => {
-                ports_info+=$.param( port, true);
-                if (port.nodePort) { node_port=port.nodePort; }
-            });
-
-            tooltip=`${ports_info}  ${labels}`;
-            svcDiv = '';
-
-            svcDiv += '<div>';
-            label = service.metadata.name;
-            if (node_port != undefined) {
-                label += '[' + node_port + ']';
-            }
-            svcDiv += createElemDiv("service", service, label, x, y, tooltip);
+            svcDiv = createServiceDiv(service);
             deployments.forEach( (deployment, index) => {
                 if (show_kube_components.state || (deployment.metadata.name != 'kubernetes')) {
                     if (service.metadata.name == deployment.metadata.name) {
@@ -659,8 +838,9 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      deploys_info='';
      deployments.forEach( (deployment, index) => {
          // let y=100+100*index;
+         //let x=110; //100*index;
          let y=0;
-         let x=110; //100*index;
+         let x=0;
 
          itemSeenIdx = indexOfUIDInList(deploys_seen, deployment.metadata.uid);
          debug_dep(`${itemSeenIdx} ${deployment.metadata.uid}`);
@@ -683,12 +863,11 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      nodeDivText[masterIdx]+=deploys_info;
 
      replicasets_info='';
-     lastreplicaset=0;
      replicasets.forEach( (replicaset, index) => {
-         let y=100+100*index;
-         let x=110; //100*index;
-
-         lastreplicaset=replicaset;
+         //let y=100+100*index;
+         //let x=110; //100*index;
+         let y=0;
+         let x=0;
 
          itemSeenIdx = indexOfUIDInList(replicasets_seen, replicaset.metadata.uid);
          if (itemSeenIdx == -1) {
@@ -705,71 +884,11 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
      debug_pod(`#pods=${pods.length}`);
      pods.forEach( (pod, index) => {
-         debug_pod(`pod[${index}]: ${pod.metadata.name}`);
-         podText = pod.metadata.name;
-         x += 100;
-         loop++;
-
-         debug_pod( `${pod.metadata.uid} - ${pod.metadata.name} on ${pod.spec.nodeName}` );
-
-         tooltip='';
-
-         image=pod.spec.containers[0].image
-         fg=undefined;
-         bg=undefined;
-         // pod.status.phase = "Error";
-         if ( pod.status.phase == "Running" ) {
-             // color based on style, label color or version ...
-             fg='black';
-             if ((image.indexOf(":1") != -1) || (image.indexOf(":v1") != -1)) {
-                 bg='#4f4';
-	     } else if ((image.indexOf(":2") != -1) || (image.indexOf(":v2") != -1)) {
-                 bg='#aa4';
-	     } else if ((image.indexOf(":3") != -1) || (image.indexOf(":v3") != -1)) {
-                 bg='#4b4';
-	     } else if ((image.indexOf(":4") != -1) || (image.indexOf(":v4") != -1)) {
-                 bg='#4b8';
-	     } else if ((image.indexOf(":5") != -1) || (image.indexOf(":v5") != -1)) {
-                 bg='#48b';
-	     } else if (image.indexOf(":latest") != -1) {
-                 fg='green';
-                 bg='#4a4';
-             } else {
-                 bg='#44f';
-             }
-         } else if ( pod.status.phase == "Error" ) {
-             fg='red';
-             bg='pink';
-         } else if ( pod.status.phase == "Pending" ) {
-             fg='black';
-             bg='orange';
-         } else if ( pod.status.phase == "Container Creating" ) {
-             fg='black';
-             bg='yellow';
-         } else {
-             // ????
-             console.log(`Unknown ${pod.status.phase} seen`);
-             fg='orange';
-             bg='pink';
-         }
-
-         debug_color(`[image ${image}][${pod.status.phase}] fg: ${fg} bg:${bg}`);
          nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
-         debug_pod(`${pod.metadata.name} is '${pod.status.phase}' on node[${nodeIndex}] '${pod.spec.nodeName}'`);
+         const podDiv = createPodDiv(pod);
+         //debug_pod(`pod[${index}]: ${pod.metadata.name}`);
 
-         classes="pod"
-         if (nodes[nodeIndex].lastPodImage == undefined) {
-            classes += " row";
-         } else if (nodes[nodeIndex].lastPodImage == image) {
-            classes += " col";
-         }
-         podDiv = createElemDiv(classes, pod, podText, x, y, tooltip, fg, bg);
-
-         nodes[nodeIndex].lastPodImage=image;
-         const pod_info = podDiv;
-
-
-         nodeDivText[nodeIndex] += pod_info;
+         nodeDivText[nodeIndex] += podDiv;
      });
 
      let ALL_info ='';
