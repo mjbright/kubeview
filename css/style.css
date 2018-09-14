@@ -180,6 +180,9 @@
     line-height: 18px;
     /*height: 18px;*/
     height: max-content;
+    /*width: max-content;*/
+    width: 300px;
+    word-wrap: normal;
 
     opacity: 0;
     -webkit-transition:opacity 0.4s ease-out;
