@@ -51,10 +51,12 @@ const include_type=true;
 
 //-- Configuration definitions: -----------------------------------------------
 
-const getClusterState_timeout = 5000;
+//const getClusterState_timeout = 5000;
+const getClusterState_timeout = 3000;
 
 var namespace="default";
 
+const version_path="/version";
 const nodes_path="/api/v1/nodes";
 const namespaces_path="/api/v1/namespaces";
 
