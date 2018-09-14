@@ -478,7 +478,6 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         };
      });
 
-    var ALL_info=''
     var nodeDivText=[];
 
     // Determine which is the (only) Master node:
@@ -694,6 +693,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          nodeDivText[nodeIndex] += pod_info;
      });
 
+     let ALL_info ='';
      nodes.forEach( (node, index)      => {
          ALL_info += nodeDivText[index] + ' </div>';
      });
