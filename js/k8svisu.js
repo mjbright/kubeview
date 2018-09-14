@@ -27,7 +27,7 @@ const debug_deploys=false;
 const debug_replicasets=false;
 const debug_pods=false;
 const debug_connects=true;
-const debug_colors=false;
+const debug_colors=true;
 const enable_connects=false; // Needs placement debugging !
 
 const debug_log  = (msg) => { if (debug)          console.log("debug: " + msg); }
@@ -44,8 +44,10 @@ const debug_color   = (msg) => { if (debug_colors)   console.log("debug_color: "
 //const debug_loops=1;
 //const debug_loops=0;
 //var debug_loops=1;
-var pause_visu={ state: false };
-var show_kube_components={ state: false };
+var pause_visu           = { state: false };
+var show_kube_components = { state: false };
+var enable_tooltips      = { state: false };
+
 const debug_timing=false;
 
 // Include type prefix in displayed element names, e.g. 'Service: <service-name>':
@@ -169,6 +171,9 @@ const detectChanges = () => {
     let oldConfigHash=configHash;
 
     configHash='';
+
+    configHash += enable_tooltips.state;
+    configHash += show_kube_components.state;
 
     nodes.forEach( (node, index) => {
         configHash += node.metadata.uid
@@ -472,11 +477,13 @@ const startPage = () => {
 	//
     let runningButtonText = createCheckBoxText( "run_or_pause", "Pause", "Pause", pause_visu.state);
 
+    let tooltipButtonText = createCheckBoxText( "enable_tooltip", "Enable tooltips", "Enable tooltips", enable_tooltips.state);
 
     let showKubeCompButtonText = createCheckBoxText( "show_kubernetes", "show_all", "Show Kubernetes components", show_kube_components.state);
 
-    let toplineMenu=`<div><div class="row" ><b>Kubernetes ${kube_version}</b>, <b>Namespace:</b> </div> <div class="col" > ${nsMenu} </div>
-            ${runningButtonText} ${showKubeCompButtonText} &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${sourceURL} </div>`;
+    let toplineMenu=`<div><div class="row" ><b>Cluster Name:</b> <i>${CLUSTERNAME}</i>, <b>Kubernetes:</b><i>${kube_version}</i>, <b>Namespace:</b> </div> <div class="col" > ${nsMenu} </div></div>
+    ${runningButtonText} ${tooltipButtonText} ${showKubeCompButtonText}
+    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${sourceURL}`;
 
     $('#k8s_namespace').empty();
     $('#k8s_namespace').append(toplineMenu);
@@ -486,8 +493,14 @@ const startPage = () => {
             setTimeout(getClusterState, getClusterState_timeout);
 	});
 
+    addCheckBoxHandler("enable_tooltip", "Enable tooltips", enable_tooltips,
+        (id, label, checkState) => {
+            setTimeout(getClusterState, getClusterState_timeout);
+	});
+
     addCheckBoxHandler("show_kubernetes", "Show Kubernetes components", show_kube_components,
         (id, label, checkState) => { getClusterState(); });
+
 };
 
 const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
