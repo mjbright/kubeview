@@ -358,8 +358,8 @@ const getMasterIndex = (nodes) => {
 
     nodes.forEach( (node, index)      => {
         if ('node-role.kubernetes.io/master' in node.metadata.labels) {
-            name = '*' + node.metadata.name;
-            role = 'master';
+            // UNUSED: name = '*' + node.metadata.name;
+            // UNUSED: role = 'master';
             masterIdx=index;
             master=nodes[index];
             //debug_log("MASTER=" + index);
