@@ -509,18 +509,68 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
         nodeDivText[index]='';
 
-        name = node.metadata.name;
+        const name = node.metadata.name;
+        let nameText = name;
         role = 'worker';
         if (index == masterIdx) {
-            name = '<b>*<u>' + node.metadata.name + '</u>*</b>';
+            nameText = '<b>*<u>' + node.metadata.nameText + '</u>*</b>';
             role = 'master';
         }
 
         nodeDivText[index]+='<i>' + name + '</i>';
         tooltip=''
-        nodeDivText[index] = startElemDiv("node", node, nodeDivText[index], x, y, tooltip);
+
+        // HERE: SET CLASS NOT READY UNSCHED ETC
+            // TO GET CSS VARIABLES:
+            // window.getComputedStyle(document.documentElement).getPropertyValue('--color-font-general');
+            // TO SET CSS VARIABLES:
+            // document.documentElement.style.setProperty('--color-font-general', '#000');
+        classes="node";
+        var ready=true;
+        // debug_nodestatus(`${name}: Assuming ready ...`);
+        node.status.conditions.forEach( (condition, index) => {
+            if (condition.type == 'Ready') {
+                if (condition.status == 'True') {
+                    debug_nodestatus(`${name}: Ready...`);
+                } else {
+                    ready=false;
+                    debug_nodestatus(`${name}: Readiness ${condition.status}...`);
+                };
+                return;
+            }
+        });
+
+        if (ready && debug_nodesstatus) {
+            debug_nodestatus(`${name}: taints: ${node.spec.taints}...`);
+            if (node.spec.taints) {
+                if (name in node.spec.taints) {
+                    debug_nodestatus(`${name}: ${node.spec.taints[name]}...`);
+                } else {
+                    debug_nodestatus(`${name}: not in taints: ${node.spec.taints}...`);
+               }
+           }
+        }
+
+        if (!ready) {
+            classes += " notready";
+	} else if (node.spec.taints &&
+	           (name in node.spec.taints) &&
+		   ( (node.spec.taints[name] == 'DoNotSchedulePods') ||
+		     (node.spec.taints[name] == 'NoExecute') )) {
+            classes += " unsched";
+            debug_nodestatus(`${name}: Tainted ${node.spec.taints[node.metadata.name]}`);
+        } else if ( (index == masterIdx) &&
+                    ('node-role.kubernetes.io/master' in node.metadata.labels) ) {
+	    node_role=node.metadata.labels['node-role.kubernetes.io/master'];
+	    if (node_role == 'NoSchedule' ) {
+                debug_nodestatus(`${name}: node-role ${node_role}`);
+                classes += " unsched";
+            }
+        }
+        nodeDivText[index] = startElemDiv(classes, node, nodeDivText[index], x, y, tooltip);
         //if (index != masterIdx) {
-        nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />'; /* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
+	/* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
+        nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />';
         //}
 
         // Used for correct pod placement on a row:
