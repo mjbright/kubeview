@@ -12,20 +12,26 @@ let ids_seen = [];
 let configHash='';
 let force_redraw=false;
 
+let kube_version=undefined;
+
 //-- Constant definitions: ----------------------------------------------------
 
 const debug=false;
+const debug_toplevel=true; // show calls to getClusterState, setTimeout, drawAll
 const debug_nodes=false;
+const debug_nodesstatus=false;
 const debug_services=false;
 const debug_deploys=false;
 const debug_replicasets=false;
 const debug_pods=false;
 const debug_connects=true;
-const debug_colors=true;
+const debug_colors=false;
 const enable_connects=false; // Needs placement debugging !
 
 const debug_log  = (msg) => { if (debug)          console.log("debug: " + msg); }
+const debug_TOP  = (msg) => { if (debug_toplevel)  console.log("debug_TOP: " + msg); }
 const debug_node = (msg) => { if (debug_nodes)    console.log("debug_node: " + msg); }
+const debug_nodestatus = (msg) => { if (debug_nodesstatus) console.log("debug_nodestatus: " + msg); }
 const debug_svc  = (msg) => { if (debug_services) console.log("debug_service: " + msg); }
 const debug_dep  = (msg) => { if (debug_deploys)  console.log("debug_deploy: " + msg); }
 const debug_rs   = (msg) => { if (debug_replicasets) console.log("debug_replicaset: " + msg); }
@@ -147,7 +153,7 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
     } else if (type == 'pod') {
         debug_pod(stElemDiv+' </div>');
     } else {
-        if (debug) { console.log(stElemDiv+' </div>'); }
+        debug_log(stElemDiv+' </div>');
     }
 
     return stElemDiv;
@@ -183,10 +189,12 @@ const detectChanges = () => {
     });
 
     if (configHash == oldConfigHash) {
+        debug_TOP('detectChanges: NO-REDRAW');
         //console.log(`detectChanges: NO-REDRAW configHash=${configHash} == ${oldConfigHash}`);
         return false;
     }
 
+    debug_TOP('detectChanges: REDRAW');
     //console.log(`detectChanges: REDRAW configHash=${configHash} != ${oldConfigHash}`);
     //console.log(`#nodes=${nodes.length}`);
 
@@ -218,6 +226,7 @@ const getClusterState = () => {
     // Don't redisplay at all if no changes seen via APIs.
     //$('#cluster').empty();
 
+    debug_TOP(`getClusterState: using namespace ${namespace}`);
     setPaths(namespace);
 
     const firstReq=jQuery.now();
@@ -722,7 +731,7 @@ const redrawAll = (info) => {
     // When changes are detected, redraw cluster:
 
     $("#cluster").empty();
-    debug_log("redrawAll @ " + jQuery.now());
+    debug_TOP("redrawAll @ " + jQuery.now());
 
     $('#cluster').append(info);
     if (! enable_connects) {
