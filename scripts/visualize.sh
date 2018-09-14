@@ -46,12 +46,24 @@ add_source_tooltip() {
    SOURCEURL=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
    [ -z "$SOURCEURL" ] && SOURCEURL=$PWD
 
+   # TODO:
+   # Separate out config.js.template, create here config.js
+   # include config.js from index.html
+
    TOOLTIP="Sourced from $SOURCEURL"
    #echo "SOURCEURL='$SOURCEURL'"
    #echo "TOOLTIP='$TOOLTIP'"
+
+   # Get/show context/cluster in toplinemenu
+   # - to get context: kubectl config current-context
+   # - to get cluster: kubectl config current-context | sed 's/.*@//'
+   CONTEXT=$(kubectl config current-context);
+   CLUSTER=${CONTEXT#*@};
+   #echo $CLUSTER
    sed \
        -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" \
        -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
+       -e "s_CLUSTERNAME='CLUSTERNAME'_CLUSTERNAME='$CLUSTER'_" \
 		   index.html.template > index.html
 
    ls -al index.html

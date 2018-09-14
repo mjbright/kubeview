@@ -4,6 +4,7 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script>
         var sourceURL="<div style='text-align: right;' data-tip='TOOLTIP' class='rcol tooltip' >Source</div>";
+        var CLUSTERNAME='CLUSTERNAME';
     </script>
 </head>
 <body>
