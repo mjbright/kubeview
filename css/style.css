@@ -51,7 +51,8 @@
 }
 
 .deployment {
-    border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
+    /*border-radius: 25px;*/
+    border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
     position: absolute;
@@ -69,7 +70,8 @@
 
 
 .replicaset {
-    border-radius: 25px; border-style: solid; border-width: var(--main-border-width);
+    /*border-radius: 25px;*/
+    border-style: solid; border-width: var(--main-border-width);
     border-color: var(--main-border-color);
 
     position: absolute;
@@ -258,4 +260,3 @@
     text-decoration: none;
 };
 
-    
