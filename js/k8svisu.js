@@ -510,11 +510,65 @@ const createReplicaSetDiv = (object) => {
         objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip);
     }
 
-    return objectDiv;
+    const content=''
+    const modalDiv = createModalText('replicaset', object, objectDiv, objectText, content);
+
+    return modalDiv;
+};
+
+const getType = (object) => {
+    if (object.metadata.selfLink) {
+        if (object.metadata.selfLink.indexOf("/deployments/") != -1) {
+            return 'deployment';
+        } else if (object.metadata.selfLink.indexOf("/pods/") != -1) {
+            return 'pod';
+        } else if (object.metadata.selfLink.indexOf("/services/") != -1) {
+            return 'service';
+        } else if (object.metadata.selfLink.indexOf("/replicasets/") != -1) {
+            return 'replicaset';
+        } else if (object.metadata.selfLink.indexOf("/nodes/") != -1) {
+            return 'node';
+	}
+    }
+
+    return 'unknown';
+}
+
+const getImage = (object) => {
+    let image=undefined;
+
+    if (getType(object) == 'replicaset') {
+        if (!object.spec.template) {
+            die("replicaset: no template!");
+	}
+        if (!object.spec.template.spec.containers) {
+            die("replicaset: no template.spec.containers!");
+	}
+        image=object.spec.template.spec.containers[0].image;
+        console.log(`replicaset: ${object.metadata.name}: ${image}`);
+    }
+
+    if (object.spec.containers) {
+        image=object.spec.containers[0].image;
+        return image;
+    } else if (object.spec.template && object.spec.template.spec.containers) {
+        image=object.spec.template.spec.containers[0].image;
+	    //console.log(`RS: ${object.metadata.selfLink}`);
+	    //console.log(`RS: ${image}`);
+	    //die("OK");
+        return image;
+    } else {
+        return undefined;
+    }
+    return undefined;
 };
 
 const getImageVersion = (object) => {
-    const image=object.spec.containers[0].image;
+    let image=getImage(object);
+	console.log(`getImage(${object.metadata.name}: ${image}`);
+    if (image == undefined) {
+        return '';
+    }
 
     let image_version='';
     if ((image.indexOf(":latest") == -1) && (image.indexOf(":") != -1)) {
@@ -524,9 +578,22 @@ const getImageVersion = (object) => {
     return image_version;
 };
 
+// TO GET CSS VARIABLES:
+//   window.getComputedStyle(document.documentElement).getPropertyValue('--varname');
+// TO SET CSS VARIABLES:
+//   document.documentElement.style.setProperty('--varname', '#000');
+const getCSSVariable = (name) => {
+   return window.getComputedStyle(document.documentElement).getPropertyValue(name);
+};
+
+const setCSSVariable = (name, value) => {
+   document.documentElement.style.setProperty(name, value);
+};
+
 const getPodColors = (object, image, image_version) => {
     let fg=undefined;
     let bg=undefined;
+
 
     // object.status.phase = "Error";
     if ( object.status.phase == "Running" ) {
