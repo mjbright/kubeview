@@ -36,7 +36,7 @@ let statusUnknownBgColor = undefined;
 //-- Constant definitions: ----------------------------------------------------
 
 const debug=false;
-const debug_toplevel=true; // show calls to getClusterState, setTimeout, drawAll
+const debug_toplevel=false; // show calls to getClusterState, setTimeout, drawAll
 const debug_nodes=false;
 const debug_nodesstatus=false;
 const debug_services=false;
@@ -44,7 +44,7 @@ const debug_deploys=false;
 const debug_replicasets=false;
 const debug_pods=false;
 const debug_connects=true;
-const debug_colors=true;
+const debug_colors=false;
 const enable_connects=false; // Needs placement debugging !
 
 const debug_log  = (msg) => { if (debug)          console.log("debug: " + msg); }
@@ -152,7 +152,7 @@ ${tooltip}`;
     if (fg != undefined) { color_style+='color: ' + fg + ';'; }
     if (bg != undefined) { color_style+='background-color: ' + bg + ';'; }
 
-    debug_color(`fg: ${fg} bg:${bg}`);
+    //debug_color(`fg: ${fg} bg:${bg}`);
     itemSeenIdx = indexOfUIDInList(ids_seen, uid);
     if (itemSeenIdx != -1) {
         die("id seen already: " + uid);
@@ -569,7 +569,7 @@ const getImage = (object, image) => {
             die("replicaset: no template.spec.containers!");
 	}
         image=object.spec.template.spec.containers[0].image;
-        console.log(`replicaset: ${object.metadata.name}: ${image}`);
+        // debug(`replicaset: ${object.metadata.name}: ${image}`);
     }
 
     if (object.spec.containers) {
@@ -589,7 +589,7 @@ const getImage = (object, image) => {
 
 const getImageVersion = (object) => {
     let image=getImage(object);
-	console.log(`getImage(${object.metadata.name}: ${image}`);
+    // debug(`getImage(${object.metadata.name}: ${image}`);
     if (image == undefined) {
         return '';
     }
@@ -623,9 +623,26 @@ const getObjectColors = (object, image, image_version) => {
     let bg=undefined;
     const phase = object.status.phase;
     const name = object.metadata.name;
+    const type=getType(object);
 
     // phase = "Error";
-    if ( phase == "Running" ) {
+    let colorBasedOnImage=false;
+    if (type == 'pod' && phase == 'Running') {
+        colorBasedOnImage=true;
+    }
+    if (type == 'replicaset') {
+        colorBasedOnImage=true;
+        // NO phase, debug_color(`RS: ${phase}`);
+	    // Use "status": {
+	    // "replicas": 4,
+	    // "fullyLabeledReplicas": 4,
+	    // "readyReplicas": 4,
+	    // "availableReplicas": 4,
+	    // "observedGeneration": 4
+	    // }
+    }
+
+    if (colorBasedOnImage) {
         // color based on style, label color or version ...
         fg='black';
         if ((image.indexOf(":1") != -1) || (image.indexOf(":v1") != -1)) {
@@ -659,11 +676,16 @@ const getObjectColors = (object, image, image_version) => {
         console.log(`Unknown ${phase} seen`);
         fg=statusUnknownFgColor;
         bg=statusUnknownBgColor;
-        type=getType(object);
         die(`Unknown ${phase} seen on ${type}:${name}`);
     }
 
-    debug_color(`[image ${image}][${phase}] fg: ${fg} bg:${bg}`);
+    if (type == 'replicaset') {
+      if (colorBasedOnImage) {
+        debug_color(`[Based on image, image ${image}][${phase}] fg: ${fg} bg:${bg}`);
+      } else {
+        debug_color(`[Based on phase, image ${image}][${phase}] fg: ${fg} bg:${bg}`);
+      }
+    }
     return [fg, bg];
 }
 
@@ -692,8 +714,8 @@ const createPodDiv = (object, nodeIndex) => {
     colors = getObjectColors(object, image, image_version);
     fg=colors[0];
     bg=colors[1];
-    debug_color(`POD COLOR: fg=${fg} bg=${bg}`);
-    debug_pod(`${object.metadata.name} is '${object.status.phase}' on node[${nodeIndex}] '${object.spec.nodeName}'`);
+    //debug_color(`POD COLOR: fg=${fg} bg=${bg}`);
+    //debug_pod(`${object.metadata.name} is '${object.status.phase}' on node[${nodeIndex}] '${object.spec.nodeName}'`);
 
     classes="pod"
     if (nodes[nodeIndex].lastPodImage == undefined) {
