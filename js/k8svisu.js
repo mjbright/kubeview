@@ -791,6 +791,32 @@ const createModalText = (type, object, href_content, id, markup) => {
     * window.location.protocol returns the web protocol used (http: or https:)
     * window.location.assign loads a new document
     */
+    if (getType(object) == 'pod') {
+        typeSpecific="<h3>Addresses</h3>";
+
+        typeSpecific += `<h4>Host-ip: ${object.status.hostIP}</h4>`;
+        typeSpecific += `<h4>Pod-ip: ${object.status.podIP}</h4>`;
+    }
+
+    if (getType(object) == 'node') {
+        typeSpecific="<h3>Addresses</h3>";
+
+        Object.keys(object.metadata.annotations).forEach( (key, index) => {
+            // Works with flannel at least ...
+	    if (key.indexOf("public-ip") != -1) {
+                const ip = object.metadata.annotations[key];
+                typeSpecific += `<h4>Public-ip: ${ip}</h4>`;
+	    }
+	});
+
+        typeSpecific += '<ul>';
+	object.status.addresses.forEach( (address, index) => {
+            typeSpecific += `<li> ${address.type}: ${address.address} </li>`;
+
+	});
+        typeSpecific += '</ul>';
+    };
+
     if (getType(object) == 'service') {
         const protocol=window.location.protocol;
         const hostname=window.location.hostname;
