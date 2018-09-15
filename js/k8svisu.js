@@ -913,13 +913,14 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         const name = node.metadata.name;
         let nameText = name;
         role = 'worker';
+
         if (index == masterIdx) {
-            nameText = '<b>*<u>' + node.metadata.nameText + '</u>*</b>';
+            nameText = '<b>*<u>' + node.metadata.name + '</u>*</b>';
             role = 'master';
         }
 
-        nodeDivText[index]+='<i>' + name + '</i>';
         tooltip=''
+        nodeDivText[index]+='<i>' + nameText + '</i>';
 
         classes="node";
         var ready=true;
@@ -963,6 +964,10 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                 classes += " unsched";
             }
         }
+
+        const objectDiv='';
+        const content='';
+        const object=node;
 
         stElemDiv = startElemDiv(classes, node, nodeDivText[index], x, y, tooltip);
         nodeDivText[index] = stElemDiv;
