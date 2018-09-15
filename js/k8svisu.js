@@ -484,16 +484,22 @@ const createServiceDiv = (object) => {
 
 const createReplicaSetDiv = (object) => {
     let replicas = object.spec.replicas;
-    let objectText=`${object.metadata.name}[${replicas}]`;
-    if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
+    let objectText=`${object.metadata.name}`;
 
-    /* NOT DEFINED: const image=object.spec.containers[0].image;
+    /* NOT DEFINED: const image=object.spec.containers[0].image; */
+    /* DEFINED: const image=object.spec.template.spec.containers[0].image; */
     const image_version=getImageVersion(object);
+    // could be latest: if (image_version == '') { die("replicaset: empty image_version"); }
+    if (image_version == undefined) { die("replicaset: undefined image_version"); }
 
+    //if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
     if (object.metadata.labels.run) {
-        let postfix=objectText.substr(objectText.lastIndexOf("-"));
-	objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
-    }*/
+        //let postfix=objectText.substr(objectText.lastIndexOf("-"));
+	//objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
+	//objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
+	objectText=`${object.metadata.labels.run}:${image_version}`;
+    };
+    objectText+=`[${replicas}]`;
 
     //let labels=getLabelsAnnotations(object);
     let tooltip="";
@@ -661,7 +667,7 @@ const createPodDiv = (object) => {
     colors = getPodColors(object, image, image_version);
     fg=colors[0];
     bg=colors[1];
-	console.log(`fg=${fg}`);
+	console.log(`POD COLOR: fg=${fg}`);
 
     classes="pod"
     if (nodes[nodeIndex].lastPodImage == undefined) {
