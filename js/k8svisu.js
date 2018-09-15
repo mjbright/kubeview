@@ -16,6 +16,12 @@ let getversion=true; /* Once only */
 
 let kube_version=undefined;
 
+let v1color = undefined;
+let v2color = undefined;
+let v3color = undefined;
+let v4color = undefined;
+let v5color = undefined;
+
 //-- Constant definitions: ----------------------------------------------------
 
 const debug=false;
@@ -904,6 +910,12 @@ const initialLoad = () => {
     });
 
     jsPlumb.fire("jsPlumbStarted", instance);
+
+    v1color = getCSSVariable( '--image-v1-color' );
+    v2color = getCSSVariable( '--image-v2-color' );
+    v3color = getCSSVariable( '--image-v3-color' );
+    v4color = getCSSVariable( '--image-v4-color' );
+    v5color = getCSSVariable( '--image-v5-color' );
 
     getClusterState();
 };
