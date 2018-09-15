@@ -677,8 +677,11 @@ const createPodDiv = (object) => {
     }
     nodes[nodeIndex].lastPodImage=image;
 
-    objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
-    return objectDiv;
+    const objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
+    const content='';
+    const modalDiv = createModalText('Pod', object, objectDiv, objectText, content);
+
+    return modalDiv;
 };
 
 const indexOfUIDInList = (idlist, id) => {
