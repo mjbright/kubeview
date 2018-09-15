@@ -607,7 +607,11 @@ const getImageVersion = (object) => {
 // TO SET CSS VARIABLES:
 //   document.documentElement.style.setProperty('--varname', '#000');
 const getCSSVariable = (name) => {
-   return window.getComputedStyle(document.documentElement).getPropertyValue(name);
+    value = window.getComputedStyle(document.documentElement).getPropertyValue(name);
+    if (value == undefined) {
+        die(`getCSSVariable: failed to get value for CSS property ${name}`);
+    }
+    return value;
 };
 
 const setCSSVariable = (name, value) => {
