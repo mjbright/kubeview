@@ -752,6 +752,13 @@ const createCheckBoxText = (id, value, label, checkState) => {
     return buttonDivText;
 };
 
+const createButtonText = (id, value, label) => {
+
+    let buttonDivText=`<div class="col"><input type="button" id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
+
+    return buttonDivText;
+};
+
 const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
     let button = document.querySelector(`#${id}`);
 
@@ -759,6 +766,15 @@ const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
         checkState_obj.state = !checkState_obj.state;
         debug_log(`Button ${id} clicked, '${label}' state now: ${checkState_obj.state}`);
 	handler(id, label, checkState_obj);
+    });
+};
+
+const addButtonHandler = (id, label, handler) => {
+    let button = document.querySelector(`#${id}`);
+
+    button.addEventListener('click', (e) => {
+        debug_log(`Button ${id} clicked, '${label}'`);
+	handler(id, label);
     });
 };
 
