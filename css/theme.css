@@ -41,9 +41,22 @@
     --container-fg-color: blue;
 
     /* colors for image versions (can apply to pods/replicasets) */
-    --image-v1-color: rgb(40,180,40);
-    --image-v2-color: rgb(40,140,80);
-    --image-v3-color: rgb(40,100,120);
-    --image-v4-color: rgb(40,60,160);
-    --image-v5-color: rgb(40,20,200);
+    --image-v1-bg-color: rgb(40,180,40);
+    --image-v2-bg-color: rgb(40,140,80);
+    --image-v3-bg-color: rgb(40,100,120);
+    --image-v4-bg-color: rgb(40,60,160);
+    --image-v5-bg-color: rgb(40,20,200);
+
+    --image-vLATEST-bg-color: rgb(120, 120, 180);
+    --image-vDEFAULT-bg-color: rgb(180, 180, 120);
+
+    /* colors for pod status.phase */
+    --status-error-fg-color: red;
+    --status-error-bg-color: pink;
+    --status-pending-fg-color: black;
+    --status-pending-bg-color: orange;
+    --status-creating-fg-color: black;
+    --status-creating-bg-color: yellow;
+    --status-unknown-fg-color: orange;
+    --status-unknown-bg-color: pink;
 };
