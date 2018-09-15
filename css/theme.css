@@ -21,14 +21,14 @@
     --unsched-node-border-color: rgb(40, 80, 180);
 
     /* Color: for NotReady nodes */
-    --notready-bg-color: rgba(180, 120, 80, 0.1);
-    --notready-fg-color: rgb(180, 120, 80);
-    --notready-border-color: rgb(180, 120, 80);
+    --notready-bg-color: rgba(255, 40, 40, 0.2);
+    --notready-fg-color: rgb(255,   0,  0);
+    --notready-border-color: rgb(255,   0,  0);
 
-    --service-bg-color: rgb(180,180, 40);
-    --service-fg-color: white;
+    --service-bg-color: rgb(255, 255, 180);
+    --service-fg-color: black;
 
-    --deploy-bg-color: rgb(150,150, 40);
+    --deploy-bg-color: rgb(120, 80, 60);
     --deploy-fg-color: white;
 
     --replicaset-bg-color: rgb( 25, 25,232);
@@ -41,14 +41,14 @@
     --container-fg-color: blue;
 
     /* colors for image versions (can apply to pods/replicasets) */
-    --image-v1-bg-color: rgb(40,180,40);
-    --image-v2-bg-color: rgb(40,140,80);
-    --image-v3-bg-color: rgb(40,100,120);
-    --image-v4-bg-color: rgb(40,60,160);
-    --image-v5-bg-color: rgb(40,20,200);
+    --image-v1-bg-color: rgb(80,180,80);
+    --image-v2-bg-color: rgb(80,140,120);
+    --image-v3-bg-color: rgb(80,100,160);
+    --image-v4-bg-color: rgb(80,60,200);
+    --image-v5-bg-color: rgb(80,20,240);
 
-    --image-vLATEST-bg-color: rgb(120, 120, 180);
-    --image-vDEFAULT-bg-color: rgb(180, 180, 120);
+    --image-vLATEST-bg-color: rgb(160, 160, 240);
+    --image-vDEFAULT-bg-color: rgb(255, 240, 180);
 
     /* colors for pod status.phase */
     --status-error-fg-color: red;
