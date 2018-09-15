@@ -500,7 +500,8 @@ const createReplicaSetDiv = (object) => {
 
     /* NOT DEFINED: const image=object.spec.containers[0].image; */
     /* DEFINED: const image=object.spec.template.spec.containers[0].image; */
-    const image_version=getImageVersion(object);
+    const image=getImage(object);
+    const image_version=getImageVersion(object, image);
     // could be latest: if (image_version == '') { die("replicaset: empty image_version"); }
     if (image_version == undefined) { die("replicaset: undefined image_version"); }
 
@@ -518,15 +519,21 @@ const createReplicaSetDiv = (object) => {
     let x=0;
     let y=0;
 
+    //classes="replicaset box-outer col";
+    //classes="replicaset outter col";
+    //objectText='<div class="box-inner">HELLO</div>' + objectText;
+    classes="replicaset col";
     if (replicas == 0) {
         fg='black';
         bg='gray';
-        debug_color(`[rs replicas=0] fg: ${fg} bg:${bg}`);
-        objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip, fg, bg);
     } else {
-        debug_color(`[rs replicas=${replicas}] fg: undefined, bg: undefined`);
-        objectDiv = createElemDiv("replicaset col", object, objectText, x, y, tooltip);
+        colors = getObjectColors(object, image, image_version);
+        fg=colors[0];
+        bg=colors[1];
     }
+
+    debug_color(`[RS COLOR replicas=${replicas}] fg: ${fg} bg:${bg}`);
+    objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
 
     const content=''
     const modalDiv = createModalText('replicaset', object, objectDiv, objectText, content);
@@ -552,8 +559,7 @@ const getType = (object) => {
     return 'unknown';
 }
 
-const getImage = (object) => {
-    let image=undefined;
+const getImage = (object, image) => {
 
     if (getType(object) == 'replicaset') {
         if (!object.spec.template) {
