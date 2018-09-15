@@ -483,13 +483,11 @@ const createServiceDiv = (object) => {
         objectText += ' [NodePort: ' + node_port + ']';
         tooltip += `NodePort: ${node_port}`;
     }
-    objectDiv = '<div>';
-    //objectDiv = '';
-    objectDiv += createElemDiv("service", object, objectText, x, y, tooltip);
-    content='';
+
+    const content='';
+    const objectDiv = '<div>' +
+        createElemDiv("service", object, objectText, x, y, tooltip);
     modalDiv = createModalText('Service', object, objectDiv, objectText, content);
-    //modalDiv += '</div>';
-    //svcDiv += createElemDiv("service", object, label, x, y, tooltip);
 
     return modalDiv;
 };
