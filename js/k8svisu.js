@@ -781,8 +781,9 @@ const createModalText = (type, object, href_content, id, markup) => {
 		    </h3>`;
     }
 
+    let typeSpecific='';
+
     // http://127.0.0.1:18002/api/v1/namespaces/default/services/flask-app/proxy/
-    let proxyLink='';
     /*
     * window.location.href returns the href (URL) of the current page
     * window.location.hostname returns the domain name of the web host
@@ -795,21 +796,26 @@ const createModalText = (type, object, href_content, id, markup) => {
         const hostname=window.location.hostname;
         const port=window.location.port;
         const rootURL=`${protocol}://${hostname}:${port}`;
-        //console.log(`protocol=${window.location.protocol}  hostname=${window.location.hostname} rootURL=${rootURL}`);
         const path = `/api/v1/namespaces/${namespace}/services/${object.metadata.name}/proxy/`;
         const href = `${rootURL}${path}`;
-        //console.log(`href=${href}`);
-        proxyLink=`<h3>Service Link:</h3>
-	    <a href="${path}"> ${href} </a>
-		    `;
-	    //die("TEST");
+
+        const proxyLink=`<h3>Service Link:</h3> <a href="${path}"> ${href} </a> `;
+
+        getBUTTON='';
+        getOUTPUT='';
+
+        typeSpecific=`
+                ${proxyLink}
+                ${getBUTTON}
+                ${getOUTPUT}
+`;
     };
 
     const content=`<h1>${type}: ${object.metadata.name}</h1>
                  <h3>UID: ${object.metadata.uid}</h3>
                 ${imageText}
                 ${selfLink}
-                ${proxyLink}
+                ${typeSpecific}
                 ${labelsAnnotations}
                 ${markup}
 		`;
