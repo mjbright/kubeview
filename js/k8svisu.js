@@ -16,11 +16,22 @@ let getversion=true; /* Once only */
 
 let kube_version=undefined;
 
-let v1color = undefined;
-let v2color = undefined;
-let v3color = undefined;
-let v4color = undefined;
-let v5color = undefined;
+let imagev1bgcolor = undefined;
+let imagev2bgcolor = undefined;
+let imagev3bgcolor = undefined;
+let imagev4bgcolor = undefined;
+let imagev5bgcolor = undefined;
+let imagevLATESTbgcolor = undefined;
+let imagevDEFAULTbgcolor = undefined;
+
+let statusErrorFgColor = undefined;
+let statusErrorBgColor = undefined;
+let statusPendingFgColor = undefined;
+let statusPendingBgColor = undefined;
+let statusCreatingFgColor = undefined;
+let statusCreatingBgColor = undefined;
+let statusUnknownFgColor = undefined;
+let statusUnknownBgColor = undefined;
 
 //-- Constant definitions: ----------------------------------------------------
 
@@ -1030,11 +1041,22 @@ const initialLoad = () => {
 
     jsPlumb.fire("jsPlumbStarted", instance);
 
-    v1color = getCSSVariable( '--image-v1-color' );
-    v2color = getCSSVariable( '--image-v2-color' );
-    v3color = getCSSVariable( '--image-v3-color' );
-    v4color = getCSSVariable( '--image-v4-color' );
-    v5color = getCSSVariable( '--image-v5-color' );
+    imagev1bgcolor = getCSSVariable( '--image-v1-bg-color' );
+    imagev2bgcolor = getCSSVariable( '--image-v2-bg-color' );
+    imagev3bgcolor = getCSSVariable( '--image-v3-bg-color' );
+    imagev4bgcolor = getCSSVariable( '--image-v4-bg-color' );
+    imagev5bgcolor = getCSSVariable( '--image-v5-bg-color' );
+    imagevLATESTbgcolor = getCSSVariable( '--image-vLATEST-bg-color' );
+    imagevDEFAULTbgcolor = getCSSVariable( '--image-vDEFAULT-bg-color' );
+
+    statusErrorFgColor = getCSSVariable( '--status-error-fg-color' );
+    statusErrorBgColor = getCSSVariable( '--status-error-bg-color' );
+    statusPendingFgColor = getCSSVariable( '--status-error-fg-color' );
+    statusPendingBgColor = getCSSVariable( '--status-error-bg-color' );
+    statusCreatingFgColor = getCSSVariable( '--status-error-fg-color' );
+    statusCreatingBgColor = getCSSVariable( '--status-error-bg-color' );
+    statusUnknownFgColor = getCSSVariable( '--status-error-fg-color' );
+    statusUnknownBgColor = getCSSVariable( '--status-error-bg-color' );
 
     getClusterState();
 };
