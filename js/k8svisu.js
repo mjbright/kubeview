@@ -128,9 +128,10 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
         } else if (type == 'service') {
             type_info="Service: ";
         } else if (type == 'deployment') {
-            type_info="Dep: ";
+            type_info="Deploy: ";
         } else if (type == 'replicaset') {
-            type_info="RS: ";
+            //type_info="RS: ";
+            type_info="";
         } else if (type == 'pod') {
             type_info="";
         } else {
