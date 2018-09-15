@@ -1,7 +1,11 @@
 
 :root {
+    /*--normal-bg-color: rgba(80, 140, 255, 0.5);*/
+    --normal-bg-color:rgba(40, 80, 180, 0.1);
+    --normal-fg-color: black;
+    --normal-border-color: darkgray;
+
     --main-bg-color:     grey;
-    /*--main-border-color: darkgrey;
     --main-border-width: 5px;*/
     --main-border-color: #008;
     --main-border-width: 2px;
@@ -11,9 +15,9 @@
     --title-right-color: white;
 
     /* Default color: for schedulable nodes - works, tainted masters */
-    --sched-node-bg-color: rgba(80, 180, 120, 0.1);
-    --sched-node-fg-color: rgb(80, 180, 120);
-    --sched-node-border-color: rgb(80, 180, 120);
+    --sched-node-bg-color:     white;
+    --sched-node-fg-color:     var(--normal-fg-color);
+    --sched-node-border-color: var(--normal-border-color);
 
     /* Color: for (untainted) masters */
     --unsched-node-bg-color: rgba(40, 80, 180, 0.1);
@@ -25,30 +29,31 @@
     --notready-fg-color: rgb(255,   0,  0);
     --notready-border-color: rgb(255,   0,  0);
 
-    --service-bg-color: rgb(255, 255, 180);
-    --service-fg-color: black;
+    --service-bg-color: var(--normal-bg-color);
+    --service-fg-color: var(--normal-fg-color);
 
-    --deploy-bg-color: rgb(120, 80, 60);
-    --deploy-fg-color: white;
+    --deploy-bg-color: var(--normal-bg-color);
+    --deploy-fg-color: var(--normal-fg-color);
 
-    --replicaset-bg-color: rgb( 25, 25,232);
-    --replicaset-fg-color: white;
+    --replicaset-bg-color: var(--normal-bg-color);
+    --replicaset-fg-color: var(--normal-fg-color);
 
-    --pod-bg-color: rgb(51,105,232);
-    --pod-fg-color: white;
+    --pod-bg-color: var(--normal-bg-color);
+    --pod-fg-color: var(--normal-fg-color);
 
     --container-bg-color: rgb(40,40,180); /* dark blue */
     --container-fg-color: blue;
 
     /* colors for image versions (can apply to pods/replicasets) */
-    --image-v1-bg-color: rgb(80,180,80);
-    --image-v2-bg-color: rgb(80,140,120);
-    --image-v3-bg-color: rgb(80,100,160);
-    --image-v4-bg-color: rgb(80,60,200);
-    --image-v5-bg-color: rgb(80,20,240);
 
-    --image-vLATEST-bg-color: rgb(160, 160, 240);
-    --image-vDEFAULT-bg-color: rgb(255, 240, 180);
+    --image-v1-bg-color: rgb(0, 255, 255);
+    --image-v2-bg-color: rgb(20, 220, 220);
+    --image-v3-bg-color: rgb(40, 200, 200);
+    --image-v4-bg-color: rgb(60, 180, 180);
+    --image-v5-bg-color: rgb(800, 160, 160);
+
+    --image-vLATEST-bg-color:  var(--normal-bg-color);
+    --image-vDEFAULT-bg-color: var(--normal-bg-color);
 
     /* colors for pod status.phase */
     --status-error-fg-color: red;
