@@ -39,4 +39,11 @@
 
     --container-bg-color: rgb(40,40,180); /* dark blue */
     --container-fg-color: blue;
+
+    /* colors for image versions (can apply to pods/replicasets) */
+    --image-v1-color: rgb(40,180,40);
+    --image-v2-color: rgb(40,140,80);
+    --image-v3-color: rgb(40,100,120);
+    --image-v4-color: rgb(40,60,160);
+    --image-v5-color: rgb(40,20,200);
 };
