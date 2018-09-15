@@ -1084,8 +1084,13 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
      let ALL_info ='';
      nodes.forEach( (node, index)      => {
-         ALL_info += nodeDivText[index] + ' </div>';
+         objectDiv = nodeDivText[index] + ' </div>';
+         const content='';
+         const modalDiv = createModalText('Node', node, objectDiv, "NODE", content);
+         //ALL_info += objectDiv;
+         ALL_info += modalDiv;
      });
+
 
      // Redraw cluster only when changes are detected:
      if ( force_redraw || detectChanges() ) {
