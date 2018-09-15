@@ -172,7 +172,6 @@ ${tooltip}`;
 };
 
 const detectChanges = () => {
-    // TODO: detect changes in API results ...
 
     let oldConfigHash=configHash;
 
@@ -262,10 +261,6 @@ const getClusterState = () => {
 
     let def = $.Deferred();
 
-    // EMPTY OUT WHOLE cluster canvas: TODO - do this intelligently
-    // Don't redisplay at all if no changes seen via APIs.
-    //$('#cluster').empty();
-
     debug_TOP(`getClusterState: using namespace ${namespace}`);
     setPaths(namespace);
 
@@ -335,11 +330,6 @@ const getClusterState = () => {
     const lastReq=jQuery.now();
 
     $.when.apply( $, requests ).done( () => {
-            // TODO: DETECT CHANGES, only do empty+redraw when changes occur
-            // TODO: Don't check nodes, namespaces at each iteration
-            // TODO: Determine nodes first, determine number of entries (Service/Deploy/ReplicaSets/Pods) to determine space needed
-            // TODO: Correct dependency between different entities (Service/Deploy/ReplicaSets/Pods)
-            // TODO: Refactor this code => Need to understand Javascript variable scoping and objects first !!
 
             const doneReq=jQuery.now();
             def.resolve();
@@ -670,8 +660,6 @@ const startPage = () => {
     //----- Build up namespace dropdown menu:
     const nsMenu = buildNamespaceMenu(namespaces);
 
-    // TODO: Add modals as prettier tooltips ..
-	//
     let runningButtonText = createCheckBoxText( "run_or_pause", "Pause", "Pause", pause_visu.state);
 
     let tooltipButtonText = createCheckBoxText( "enable_tooltip", "Enable tooltips", "Enable tooltips", enable_tooltips.state);
@@ -730,11 +718,6 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         nodeDivText[index]+='<i>' + name + '</i>';
         tooltip=''
 
-        // HERE: SET CLASS NOT READY UNSCHED ETC
-            // TO GET CSS VARIABLES:
-            // window.getComputedStyle(document.documentElement).getPropertyValue('--color-font-general');
-            // TO SET CSS VARIABLES:
-            // document.documentElement.style.setProperty('--color-font-general', '#000');
         classes="node";
         var ready=true;
         // debug_nodestatus(`${name}: Assuming ready ...`);
