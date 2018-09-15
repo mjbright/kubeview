@@ -618,49 +618,52 @@ const setCSSVariable = (name, value) => {
    document.documentElement.style.setProperty(name, value);
 };
 
-const getPodColors = (object, image, image_version) => {
+const getObjectColors = (object, image, image_version) => {
     let fg=undefined;
     let bg=undefined;
+    const phase = object.status.phase;
+    const name = object.metadata.name;
 
-
-    // object.status.phase = "Error";
-    if ( object.status.phase == "Running" ) {
+    // phase = "Error";
+    if ( phase == "Running" ) {
         // color based on style, label color or version ...
         fg='black';
         if ((image.indexOf(":1") != -1) || (image.indexOf(":v1") != -1)) {
-            bg='#4f4';
+            bg=imagev1bgcolor;
 	} else if ((image.indexOf(":2") != -1) || (image.indexOf(":v2") != -1)) {
-            bg='#aa4';
+            bg=imagev2bgcolor;
 	} else if ((image.indexOf(":3") != -1) || (image.indexOf(":v3") != -1)) {
-            bg='#4b4';
+            bg=imagev3bgcolor;
 	} else if ((image.indexOf(":4") != -1) || (image.indexOf(":v4") != -1)) {
-            bg='#4b8';
+            bg=imagev4bgcolor;
 	} else if ((image.indexOf(":5") != -1) || (image.indexOf(":v5") != -1)) {
-            bg='#48b';
+            bg=imagev5bgcolor;
 	} else if (image.indexOf(":latest") != -1) {
-            fg='green';
-            bg='#4a4';
+            bg=imagevLATESTbgcolor;
         } else {
-            bg='#44f';
+            bg=imagevDEFAULTbgcolor;
         }
-    } else if ( object.status.phase == "Error" ) {
-        fg='red';
-        bg='pink';
-    } else if ( object.status.phase == "Pending" ) {
-        fg='black';
-        bg='orange';
-    } else if ( object.status.phase == "Container Creating" ) {
-        fg='black';
-        bg='yellow';
+    } else if ( phase == undefined ) {
+	    // not a pod
+    } else if ( phase == "Error" ) {
+        fg=statusErrorFgColor;
+        bg=statusErrorBgColor;
+    } else if ( phase == "Pending" ) {
+        fg=statusPendingFgColor;
+        bg=statusPendingBgColor;
+    } else if ( phase == "Container Creating" ) {
+        fg=statusCreatingFgColor;
+        bg=statusCreatingBgColor;
     } else {
         // ????
-        console.log(`Unknown ${object.status.phase} seen`);
-        fg='orange';
-        bg='pink';
+        console.log(`Unknown ${phase} seen`);
+        fg=statusUnknownFgColor;
+        bg=statusUnknownBgColor;
+        type=getType(object);
+        die(`Unknown ${phase} seen on ${type}:${name}`);
     }
 
-    debug_color(`[image ${image}][${object.status.phase}] fg: ${fg} bg:${bg}`);
-    debug_pod(`${object.metadata.name} is '${object.status.phase}' on node[${nodeIndex}] '${object.spec.nodeName}'`);
+    debug_color(`[image ${image}][${phase}] fg: ${fg} bg:${bg}`);
     return [fg, bg];
 }
 
@@ -686,10 +689,11 @@ const createPodDiv = (object) => {
 
     tooltip='';
 
-    colors = getPodColors(object, image, image_version);
+    colors = getObjectColors(object, image, image_version);
     fg=colors[0];
     bg=colors[1];
-	console.log(`POD COLOR: fg=${fg}`);
+    debug_color(`POD COLOR: fg=${fg} bg=${bg}`);
+    debug_pod(`${object.metadata.name} is '${object.status.phase}' on node[${nodeIndex}] '${object.spec.nodeName}'`);
 
     classes="pod"
     if (nodes[nodeIndex].lastPodImage == undefined) {
