@@ -719,8 +719,51 @@ const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
 const createModalText = (type, object, href_content, id, markup) => {
 
     const labelsAnnotations = getHTMLLabelsAnnotations(object);
+    const image = getImage(object);
+    let imageText = undefined;
+
+    if (image == undefined) {
+        imageText = '';
+    } else {
+        imageText = `<h3>Image: ${image}</h3>`;
+    }
+
+    let selfLink='';
+    if (object.metadata.selfLink) {
+        selfLink=`<h3>selfLink:
+	    <a href="${object.metadata.selfLink}"> ${object.metadata.selfLink} </a>
+		    </h3>`;
+    }
+
+    // http://127.0.0.1:18002/api/v1/namespaces/default/services/flask-app/proxy/
+    let proxyLink='';
+    /*
+    * window.location.href returns the href (URL) of the current page
+    * window.location.hostname returns the domain name of the web host
+    * window.location.pathname returns the path and filename of the current page
+    * window.location.protocol returns the web protocol used (http: or https:)
+    * window.location.assign loads a new document
+    */
+    if (getType(object) == 'service') {
+        const protocol=window.location.protocol;
+        const hostname=window.location.hostname;
+        const port=window.location.port;
+        const rootURL=`${protocol}://${hostname}:${port}`;
+        //console.log(`protocol=${window.location.protocol}  hostname=${window.location.hostname} rootURL=${rootURL}`);
+        const path = `/api/v1/namespaces/${namespace}/services/${object.metadata.name}/proxy/`;
+        const href = `${rootURL}${path}`;
+        //console.log(`href=${href}`);
+        proxyLink=`<h3>Service Link:</h3>
+	    <a href="${path}"> ${href} </a>
+		    `;
+	    //die("TEST");
+    };
+
     const content=`<h1>${type}: ${object.metadata.name}</h1>
                  <h3>UID: ${object.metadata.uid}</h3>
+                ${imageText}
+                ${selfLink}
+                ${proxyLink}
                 ${labelsAnnotations}
                 ${markup}
 		`;
