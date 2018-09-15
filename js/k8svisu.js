@@ -434,7 +434,7 @@ const getNodeIndex = (nodes, nodeName) => {
         return nodeIndex;
     }
 
-    die(`Failed to find node <${nodeName}> in list`);
+    //die(`Failed to find node <${nodeName}> in list`);
     return -1;
 };
 
