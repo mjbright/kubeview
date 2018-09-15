@@ -843,8 +843,11 @@ const createModalText = (type, object, href_content, id, markup) => {
 
         const proxyLink=`<h3>Service Link:</h3> <a href="${path}"> ${href} </a> `;
 
-        getBUTTON='';
-        getOUTPUT='';
+        const divid_button=object.metadata.name + '_buttonGET';
+        const divid_output=object.metadata.name + '_buttonGET_OP';
+
+	getBUTTON=createButtonText(divid_button, "GET", "GET");
+        getOUTPUT=`<div id=${divid_output}> </div>`;
 
         typeSpecific=`
                 ${proxyLink}
@@ -862,6 +865,7 @@ const createModalText = (type, object, href_content, id, markup) => {
                 ${markup}
 		`;
 
+
     const modalText=`
     <a class="modal_href" href="#${id}_modal">${href_content}</a>
 
@@ -871,6 +875,24 @@ const createModalText = (type, object, href_content, id, markup) => {
 	${content}
       </div>
       </div>`;
+
+    /* HOW TO DO THIS, I need div id to exist already ...
+     * if (getType(object) == 'service') {
+        addButtonHandler(divid_button, "GET", (id, label) => {
+            let def = $.Deferred();
+
+            const serviceGETrequest = $.getJSON(path, (obj) => {
+                console.log( $.param( object, true));
+                $(divid_output) = $.param( object, true);
+                });
+
+            const requests = [ serviceGETrequest ];
+            $.when.apply( $, requests ).done( () => {
+                def.resolve();
+            });
+	});
+    }
+    */
 
     return modalText;
 };
@@ -891,6 +913,7 @@ const startPage = () => {
 
     $('#k8s_namespace').empty();
     $('#k8s_namespace').append(toplineMenu);
+
 
     addCheckBoxHandler("run_or_pause", "Pause", pause_visu,
         (id, label, checkState) => {
