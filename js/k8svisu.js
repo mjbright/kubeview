@@ -668,7 +668,7 @@ const getObjectColors = (object, image, image_version) => {
 }
 
 
-const createPodDiv = (object) => {
+const createPodDiv = (object, nodeIndex) => {
     let objectText=`${object.metadata.name}`;
     const image=object.spec.containers[0].image;
     const image_version=getImageVersion(object);
@@ -1019,7 +1019,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      debug_pod(`#pods=${pods.length}`);
      pods.forEach( (pod, index) => {
          nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
-         const podDiv = createPodDiv(pod);
+         const podDiv = createPodDiv(pod, nodeIndex);
          //debug_pod(`pod[${index}]: ${pod.metadata.name}`);
 
          nodeDivText[nodeIndex] += podDiv;
