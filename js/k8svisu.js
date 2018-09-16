@@ -890,7 +890,7 @@ const createModalText = (type, object, href_content, id, markup) => {
             $.when.apply( $, requests ).done( () => {
                 def.resolve();
             });
-	});
+        });
     }
     */
 
@@ -911,8 +911,8 @@ const startPage = () => {
     ${runningButtonText} ${tooltipButtonText} ${showKubeCompButtonText}
     &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${sourceURL}`;
 
-    $('#k8s_namespace').empty();
-    $('#k8s_namespace').append(toplineMenu);
+    $('#top_menu').empty();
+    $('#top_menu').append(toplineMenu);
 
 
     addCheckBoxHandler("run_or_pause", "Pause", pause_visu,
@@ -1180,10 +1180,10 @@ const initialLoad = () => {
 const redrawAll = (info) => {
     // When changes are detected, redraw cluster:
 
-    $("#cluster").empty();
+    $("#k8s_cluster").empty();
     debug_TOP("redrawAll @ " + jQuery.now());
 
-    $('#cluster').append(info);
+    $('#k8s_cluster').append(info);
     if (! enable_connects) {
         return;
     }
