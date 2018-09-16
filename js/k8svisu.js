@@ -663,19 +663,23 @@ const getObjectColors = (object, image, image_version) => {
     } else if ( phase == undefined ) {
 	    // not a pod
     } else if ( phase == "Error" ) {
-        fg=statusErrorFgColor;
-        bg=statusErrorBgColor;
+        fg=statusErrorFgColor; bg=statusErrorBgColor;
+    } else if ( phase == "ErrImagePull" ) {
+        fg=statusErrorFgColor; bg=statusErrorBgColor;
+    } else if ( phase == "Failed" ) {
+        fg=statusErrorFgColor; bg=statusErrorBgColor;
+    } else if ( phase == "UnexpectedAdminissionError" ) {
+        fg=statusErrorFgColor; bg=statusErrorBgColor;
     } else if ( phase == "Pending" ) {
-        fg=statusPendingFgColor;
-        bg=statusPendingBgColor;
+        fg=statusPendingFgColor; bg=statusPendingBgColor;
     } else if ( phase == "Container Creating" ) {
-        fg=statusCreatingFgColor;
-        bg=statusCreatingBgColor;
+        fg=statusCreatingFgColor; bg=statusCreatingBgColor;
+    } else if ( phase == "Terminating" ) {
+        fg=statusPendingFgColor; bg=statusPendingBgColor;
     } else {
         // ????
         console.log(`Unknown ${phase} seen`);
-        fg=statusUnknownFgColor;
-        bg=statusUnknownBgColor;
+        fg=statusUnknownFgColor; bg=statusUnknownBgColor;
         die(`Unknown ${phase} seen on ${type}:${name}`);
     }
 
@@ -757,7 +761,7 @@ const createCheckBoxText = (id, value, label, checkState) => {
 const createButtonText = (id, value, label) => {
 
     //let buttonDivText=`<div class="col"><input type="button" id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
-    let buttonDivText=`<div class="col"><button id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
+    let buttonDivText=`<div class="col request_button"><button id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
 
     return buttonDivText;
 };
@@ -845,7 +849,6 @@ const createModalText = (type, object, href_content, id, markup) => {
         const path = `/api/v1/namespaces/${namespace}/services/${object.metadata.name}/proxy/`;
         const href = `${rootURL}${path}`;
 
-        const proxyLink=`<h3>Service Link:</h3> <a href="${path}"> ${href} </a> `;
 
         const divid_button=object.metadata.name + '_buttonGET';
         const divid_output=object.metadata.name + '_buttonGET_OP';
@@ -871,7 +874,8 @@ const createModalText = (type, object, href_content, id, markup) => {
             });
         } ] );
 
-        typeSpecific=` ${proxyLink} ${getBUTTON} ${getOUTPUT} `;
+        typeSpecific=`<h3>Service Link:</h3> ${getBUTTON}
+		      <a href="${path}"> ${href} </a> ${getOUTPUT} `;
     };
 
     const content=`<h1>${type}: ${object.metadata.name}</h1>

@@ -56,6 +56,9 @@
     --image-vDEFAULT-bg-color: var(--normal-bg-color);
 
     /* colors for pod status.phase */
+    /* TODO:
+     * handle ErrImagePull, Terminating
+     * clearr difference between error, pending, creating, ... */
     --status-error-fg-color: red;
     --status-error-bg-color: pink;
     --status-pending-fg-color: black;
