@@ -305,10 +305,11 @@ const getClusterState = () => {
 
     if ( getversion ) {
         const versionReq = $.getJSON(version_path, (obj) => {
-            kube_version=obj.gitVersion; });
+            kube_version=obj.gitVersion;
+	    console.log(`GOT kube_version[git]=${kube_version}`);
+	});
         requests.push(versionReq);
         getversion=false; /* Once only */
-	console.log("GOT VERSION");
     }
     if ( getnodes ) {
         const nodesReq = $.getJSON(nodes_path, (obj) => {
