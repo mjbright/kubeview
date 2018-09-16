@@ -12,6 +12,8 @@ let ids_seen = [];
 let configHash='';
 let force_redraw=false;
 
+let handlerList = [];
+
 let getversion=true; /* Once only */
 
 let kube_version=undefined;
@@ -278,6 +280,8 @@ const getLabelsAnnotations = (object, html) => {
 
 const getClusterState = () => {
     // interrogate API for clusterState
+
+    handlerList = [];
 
     let def = $.Deferred();
 
@@ -776,6 +780,7 @@ const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
 const addButtonHandler = (id, label, handler) => {
     let button = document.querySelector(`#${id}`);
 
+    //console.log(`Adding eventListener/handler to #${id}`);
     button.addEventListener('click', (e) => {
         debug_log(`Button ${id} clicked, '${label}'`);
 	handler(id, label);
@@ -852,12 +857,26 @@ const createModalText = (type, object, href_content, id, markup) => {
 
 	getBUTTON=createButtonText(divid_button, "GET", "GET");
         getOUTPUT=`<div id=${divid_output}> </div>`;
+	//console.log(`Pushing handler for ${divid_button}`);
+        handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
+            let def = $.Deferred();
 
-        typeSpecific=`
-                ${proxyLink}
-                ${getBUTTON}
-                ${getOUTPUT}
-`;
+            //console.log(`Making GET request to ${path}`);
+	    //console.trace();
+            const serviceGETrequest = $.get(path, (data) => {
+                //console.log( "GET gotten ok ;-)");
+                //console.log( data );
+                $('#'+divid_output).html( data );
+                });
+
+            const requests = [ serviceGETrequest ];
+            $.when.apply( $, requests ).done( () => {
+                def.resolve();
+                //console.log(`[resolved] GET request to ${path}`);
+            });
+        } ] );
+
+        typeSpecific=` ${proxyLink} ${getBUTTON} ${getOUTPUT} `;
     };
 
     const content=`<h1>${type}: ${object.metadata.name}</h1>
@@ -880,24 +899,6 @@ const createModalText = (type, object, href_content, id, markup) => {
       </div>
       </div>`;
 
-    /* HOW TO DO THIS, I need div id to exist already ...
-     * if (getType(object) == 'service') {
-        addButtonHandler(divid_button, "GET", (id, label) => {
-            let def = $.Deferred();
-
-            const serviceGETrequest = $.getJSON(path, (obj) => {
-                console.log( $.param( object, true));
-                $(divid_output) = $.param( object, true);
-                });
-
-            const requests = [ serviceGETrequest ];
-            $.when.apply( $, requests ).done( () => {
-                def.resolve();
-            });
-        });
-    }
-    */
-
     return modalText;
 };
 
@@ -917,7 +918,6 @@ const redrawTopMenu = () => {
 
     $('#top_menu').empty();
     $('#top_menu').append(toplineMenu);
-
 
     addCheckBoxHandler("run_or_pause", "Pause", pause_visu,
         (id, label, checkState) => {
@@ -1191,7 +1191,18 @@ const redrawAll = (info) => {
     $("#k8s_cluster").empty();
     debug_TOP("redrawAll @ " + jQuery.now());
 
+    // NOW we can actually put stuff into the DOM:
     $('#k8s_cluster').append(info);
+
+    // NOW we can add in handlers:
+    handlerList.forEach( ( handler_info, index ) => {
+        const divid=handler_info[0];
+        const divid_op=handler_info[1];
+        const handler=handler_info[2];
+        //console.log(`Adding handler for ${divid} + handler`);
+        addButtonHandler( divid, "GET", (id, label, divid_op) => { handler(id, label, divid_op); } );
+    });
+
     if (! enable_connects) {
         return;
     }
