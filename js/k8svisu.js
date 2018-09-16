@@ -757,7 +757,8 @@ const createCheckBoxText = (id, value, label, checkState) => {
 
 const createButtonText = (id, value, label) => {
 
-    let buttonDivText=`<div class="col"><input type="button" id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
+    //let buttonDivText=`<div class="col"><input type="button" id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
+    let buttonDivText=`<div class="col"><button id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
 
     return buttonDivText;
 };
