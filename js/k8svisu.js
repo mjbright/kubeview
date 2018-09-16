@@ -1151,19 +1151,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      }
 };
 
-const initialLoad = () => {
-    // Initial jsPlumb load
-
-    debug_log("LOAD @ " + jQuery.now());
-    jsPlumb.reset();
-
-    let instance = jsPlumb.getInstance({
-        ConnectionOverlays: connectionOverlays,
-        Container: "k8s_cluster",
-    });
-
-    jsPlumb.fire("jsPlumbStarted", instance);
-
+const readCSSVariables = () => {
     imagev1bgcolor = getCSSVariable( '--image-v1-bg-color' );
     imagev2bgcolor = getCSSVariable( '--image-v2-bg-color' );
     imagev3bgcolor = getCSSVariable( '--image-v3-bg-color' );
@@ -1180,7 +1168,22 @@ const initialLoad = () => {
     statusCreatingBgColor = getCSSVariable( '--status-error-bg-color' );
     statusUnknownFgColor = getCSSVariable( '--status-error-fg-color' );
     statusUnknownBgColor = getCSSVariable( '--status-error-bg-color' );
+};
 
+const initialLoad = () => {
+    // Initial jsPlumb load
+
+    debug_log("LOAD @ " + jQuery.now());
+    jsPlumb.reset();
+
+    let instance = jsPlumb.getInstance({
+        ConnectionOverlays: connectionOverlays,
+        Container: "k8s_cluster",
+    });
+
+    jsPlumb.fire("jsPlumbStarted", instance);
+
+    readCSSVariables();
     getClusterState();
 };
 
