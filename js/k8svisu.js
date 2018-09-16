@@ -448,11 +448,12 @@ const getNodeIndex = (nodes, nodeName) => {
 const createDeploymentDiv = (object) => {
     let replicas=`${object.status.readyReplicas}/${object.spec.replicas}`;
     let replicasForModal=`${object.status.readyReplicas} present/${object.spec.replicas} desired`;
-    let objectText=`${object.metadata.name} [${replicas}]`;
-    if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
 
-    //let labels=getLabelsAnnotations(object);
-    //let tooltip=`${labels}`;
+    //let objectText=`${object.metadata.name} [${replicas}]`;
+    //if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
+    let objectText=`${replicas}* ${object.metadata.name}`;
+    if (object.metadata.labels.run) { objectText=`${replicas}* ${object.metadata.labels.run}`; }
+
     let tooltip='';
     let x=0;
     let y=0;
@@ -481,13 +482,13 @@ const createServiceDiv = (object) => {
     if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run}`; }
     //if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
 
-    //let labels=getLabelsAnnotations(object);
     let tooltip="";
     let x=0;
     let y=0;
 
     if (node_port != undefined) {
-        objectText += ' [NodePort: ' + node_port + ']';
+        // objectText += ' [NodePort: ' + node_port + ']';
+        objectText += ' [' + node_port + ']';
         tooltip += `NodePort: ${node_port}`;
     }
 
@@ -503,23 +504,17 @@ const createReplicaSetDiv = (object) => {
     let replicas = object.spec.replicas;
     let objectText=`${object.metadata.name}`;
 
-    /* NOT DEFINED: const image=object.spec.containers[0].image; */
-    /* DEFINED: const image=object.spec.template.spec.containers[0].image; */
     const image=getImage(object);
     const image_version=getImageVersion(object, image);
-    // could be latest: if (image_version == '') { die("replicaset: empty image_version"); }
+    console.log(image_version);
     if (image_version == undefined) { die("replicaset: undefined image_version"); }
 
-    //if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
     if (object.metadata.labels.run) {
-        //let postfix=objectText.substr(objectText.lastIndexOf("-"));
-	//objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
-	//objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
-	objectText=`${object.metadata.labels.run}:${image_version}`;
+	objectText=`${object.metadata.labels.run} ${image_version}`;
     };
-    objectText+=`[${replicas}]`;
+    //objectText+=`[${replicas}]`;
+    objectText=`${replicas}* ${objectText}`;
 
-    //let labels=getLabelsAnnotations(object);
     let tooltip="";
     let x=0;
     let y=0;
@@ -601,7 +596,8 @@ const getImageVersion = (object) => {
 
     let image_version='';
     if ((image.indexOf(":latest") == -1) && (image.indexOf(":") != -1)) {
-        image_version='['+image.substr( 1+image.lastIndexOf(":") )+']';
+        //image_version='['+image.substr( 1+image.lastIndexOf(":") )+']';
+        image_version=image.substr( 1+image.lastIndexOf(":") );
     }
 
     return image_version;
