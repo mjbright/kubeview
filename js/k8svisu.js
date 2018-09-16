@@ -73,7 +73,9 @@ const include_type=true;
 //-- Configuration definitions: -----------------------------------------------
 
 //const getClusterState_timeout = 5000;
-const getClusterState_timeout = 3000;
+const active_getClusterState_timeout = 3000;
+const idle_getClusterState_timeout = 1000;
+let getClusterState_timeout = active_getClusterState_timeout;
 
 var namespace="default";
 
@@ -1133,7 +1135,10 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
      // Redraw cluster only when changes are detected:
      if ( force_redraw || detectChanges() ) {
+         getClusterState_timeout = active_getClusterState_timeout;
          redrawAll(ALL_info);
+     } else {
+         getClusterState_timeout = idle_getClusterState_timeout;
      }
 
      if (pause_visu.state) {
