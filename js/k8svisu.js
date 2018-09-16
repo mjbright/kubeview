@@ -856,7 +856,7 @@ const createModalText = (type, object, href_content, id, markup) => {
         const divid_output=object.metadata.name + '_buttonGET_OP';
 
 	getBUTTON=createButtonText(divid_button, "GET", "GET");
-        getOUTPUT=`<div id=${divid_output}> </div>`;
+        getOUTPUT=`<div id=${divid_output} class="request_output" > </div>`;
 	//console.log(`Pushing handler for ${divid_button}`);
         handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
             let def = $.Deferred();

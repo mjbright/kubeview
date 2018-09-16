@@ -274,3 +274,12 @@ iframe {
     overflow: auto;
 }
 
+/* --------------------- Request Output ------------------- */
+
+.request_output {
+    font-size: 20px;
+    font-weight: bold;
+    color: blue;
+    background: white;
+}
+
