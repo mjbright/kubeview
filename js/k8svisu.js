@@ -901,7 +901,7 @@ const createModalText = (type, object, href_content, id, markup) => {
     return modalText;
 };
 
-const startPage = () => {
+const redrawTopMenu = () => {
     //----- Build up namespace dropdown menu:
     const nsMenu = buildNamespaceMenu(namespaces);
 
@@ -936,7 +936,7 @@ const startPage = () => {
 
 const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
 
-    startPage();
+    //redrawTopMenu();
 
     var nodeDivText=[];
 
@@ -1187,6 +1187,7 @@ const initialLoad = () => {
 const redrawAll = (info) => {
     // When changes are detected, redraw cluster:
 
+    redrawTopMenu();
     $("#k8s_cluster").empty();
     debug_TOP("redrawAll @ " + jQuery.now());
 
