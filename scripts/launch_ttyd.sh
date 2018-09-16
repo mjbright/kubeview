@@ -1,5 +1,9 @@
 #!/bin/bash
 
+TTYD_BASHRC=~/.dotfiles/ttyd.bashrc                               
+                                                                  
+[ ! -f $TTYD_BASHRC ] && die "No such rc file <$TTYD_BASHRC>"     
+
 # On Ubuntu: ttyd -i enp3s0 -O -m 1 -S -d 14 -p 9001 bash
 
 #TTYD_OPTIONS="-O -m 1 -S -d 7"
@@ -32,8 +36,10 @@ done
 [ -z "$SERVE_IFACE" ] &&
     SERVE_IFACE=$(ip a | awk '/[0-9]: lo/ { FS=":"; $0=$2; print $1; exit 0; }')
 
-set -x
-ttyd -i $SERVE_IFACE -p $SERVE_PORT $TTYD_OPTIONS bash
+#set -x
+CMD="ttyd -i $SERVE_IFACE -p $SERVE_PORT $TTYD_OPTIONS bash --rcfile $TTYD_BASHRC"
+echo $CMD
+$CMD
 
 
 

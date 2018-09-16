@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+TTYD_BASHRC=~/.dotfiles/ttyd.bashrc
+
 #TTYD_OPTIONS="-O -m 1 -S -d 7"
 TTYD_OPTIONS="-O -m 1 -d 7"
 
@@ -20,10 +22,10 @@ pwd
 ls -altr
 
 [ ! -x ttyd.exe ] && die "No such executable <ttyd.exe>"
-[ ! -f ttyd.bashrc ] && die "No such rc file <ttyd.bashrc>"
+[ ! -f $TTYD_BASHRC ] && die "No such rc file <$TTYD_BASHRC>"
 
 export XXX=yyy
-CMD="/c/tools/msys64/msys2.exe ./ttyd.exe $TTYD_OPTIONS -p 9001 bash --rcfile ttyd.bashrc"
+CMD="/c/tools/msys64/msys2.exe ./ttyd.exe $TTYD_OPTIONS -p 9001 bash --rcfile $TTYD_BASHRC"
 
 echo $CMD
 $CMD
