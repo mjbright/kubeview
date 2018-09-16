@@ -5,6 +5,7 @@
     <script>
         var sourceURL="<div style='text-align: right;' data-tip='TOOLTIP' class='rcol tooltip' >Source</div>";
         var CLUSTERNAME='CLUSTERNAME';
+        var TTYDPORT='TTYDPORT';
     </script>
 </head>
 <body>

@@ -4,6 +4,7 @@
 
 #PORT=8001
 PORT=8002
+TTYDPORT=9001
 
 #kubectl proxy --www=/Users/mjb/src/git/brendandburns.gcp-live-k8s-visualizer --www-prefix=/my-mountpoint/ --api-prefix=/api/
 
@@ -20,6 +21,9 @@ while [ ! -z "$1" ];do
     case $1 in
         -p)   # Specify other port for experiments:
               shift; PORT=$1;;
+
+        -t)   # Specify ttyd port for embedded terminal:
+              shift; TTYDPORT=$1;;
 
         -r)   # Access remotely:
               IP=$(ip a | awk '!/127.0.0.1/ && / inet / { FS="/"; $0=$2; print $1; exit(0); }')
@@ -64,6 +68,7 @@ add_source_tooltip() {
        -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" \
        -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
        -e "s_CLUSTERNAME='CLUSTERNAME'_CLUSTERNAME='$CLUSTER'_" \
+       -e "s_TTYDPORT='TTYDPORT'_TTYDPORT='$TTYDPORT'_" \
 		   index.html.template > index.html
 
    ls -al index.html
