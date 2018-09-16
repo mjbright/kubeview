@@ -506,7 +506,6 @@ const createReplicaSetDiv = (object) => {
 
     const image=getImage(object);
     const image_version=getImageVersion(object, image);
-    console.log(image_version);
     if (image_version == undefined) { die("replicaset: undefined image_version"); }
 
     if (object.metadata.labels.run) {
