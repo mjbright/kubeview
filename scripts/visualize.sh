@@ -4,6 +4,7 @@
 
 #PORT=8001
 PORT=8002
+
 TTYDPORT=9001
 
 #kubectl proxy --www=/Users/mjb/src/git/brendandburns.gcp-live-k8s-visualizer --www-prefix=/my-mountpoint/ --api-prefix=/api/
@@ -20,7 +21,10 @@ OPTS=""
 while [ ! -z "$1" ];do
     case $1 in
         -p)   # Specify other port for experiments:
-              shift; PORT=$1;;
+              shift; PORT=$1; VISU_PORT=$PORT;;
+
+        -L)   # Specify other port for experiments:
+              shift; VISU_PORT=$1;;
 
         -t)   # Specify ttyd port for embedded terminal:
               shift; TTYDPORT=$1;;
@@ -46,6 +50,28 @@ while [ ! -z "$1" ];do
     shift
 done
 
+# Take into account ssh tunneling:
+[ -z "$VISU_PORT" ] && VISU_PORT=$PORT
+
+VISUURL=http://127.0.0.1:$VISU_PORT/static
+TTYDURL=http://127.0.0.1:$TTYDPORT
+
+modify_template() {
+    HTML=$1; shift;
+    TEMPLATE=$1; shift;
+
+    sed \
+        -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" \
+        -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
+        -e "s_CLUSTERNAME='CLUSTERNAME'_CLUSTERNAME='$CLUSTER'_" \
+        -e "s_TTYDURL_${TTYDURL}_" \
+        -e "s_VISUURL_${VISUURL}_" \
+            $TEMPLATE > $HTML
+
+    ls -al $HTML
+    [ ! -s $HTML ] && die "Failed to create $HTML from template"
+}
+
 add_source_tooltip() {
    SOURCEURL=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
    [ -z "$SOURCEURL" ] && SOURCEURL=$PWD
@@ -64,15 +90,9 @@ add_source_tooltip() {
    CONTEXT=$(kubectl config current-context);
    CLUSTER=${CONTEXT#*@};
    #echo $CLUSTER
-   sed \
-       -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" \
-       -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
-       -e "s_CLUSTERNAME='CLUSTERNAME'_CLUSTERNAME='$CLUSTER'_" \
-       -e "s_TTYDPORT='TTYDPORT'_TTYDPORT='$TTYDPORT'_" \
-		   index.html.template > index.html
 
-   ls -al index.html
-   [ ! -s index.html ] && die "Failed to create index.html from template"
+    modify_template index.html     index.html.template
+    modify_template dashboard.html dashboard.html.template
 }
 
 add_source_tooltip

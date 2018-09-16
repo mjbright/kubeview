@@ -5,7 +5,6 @@
     <script>
         var sourceURL="<div style='text-align: right;' data-tip='TOOLTIP' class='rcol tooltip' >Source</div>";
         var CLUSTERNAME='CLUSTERNAME';
-        var TTYDPORT='TTYDPORT';
     </script>
 </head>
 <body>
@@ -13,8 +12,8 @@
     <!-- <a href='#' data-tip='TOOLTIP' class='tooltip' >Source</a> -->
     <!-- <div style='text-align: right;' data-tip='TOOLTIP' class='tooltip' >Source</div> -->
 
-    <div id="k8s_namespace" > </div> 
-    <div class="demo k8s_cluster" id="cluster"> </div>
+    <div id="top_menu" > </div> 
+    <div class="demo k8s_cluster" id="k8s_cluster"> </div>
 
     <!-- JavaScript -->
     <script src="js/jquery-3.3.1.min.js"></script>

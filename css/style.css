@@ -260,3 +260,17 @@
     text-decoration: none;
 };
 
+
+/* --------------------- Resizable IFrames ---------------- */
+
+.resizable { width: 150px; height: 150px; padding: 0.5em; }
+
+.resizable h3 { text-align: center; margin: 0; }
+
+iframe {
+    height: 300px;
+    width: 300px;
+    resize: both;
+    overflow: auto;
+}
+

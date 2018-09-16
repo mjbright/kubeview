@@ -1,30 +1,58 @@
 <html>
+<!--
+    Resizable examples from:
+        https://stackoverflow.com/questions/8117761/how-can-i-make-an-iframe-resizable
+-->
 <head>
+    <link rel="stylesheet" type="text/css" href="css/theme.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
     <script>
-        function refreshIframe(frame) {
-            var ifr = document.getElementsByName(frame)[0];
-            ifr.src = ifr.src;
-        }
+        var sourceURL="<div style='text-align: right;' data-tip='TOOLTIP' class='rcol tooltip' >Source</div>";
+        var CLUSTERNAME='CLUSTERNAME';
     </script>
 </head>
-
 <body>
 
-<button onclick="refreshIframe('flask-app');"><b>GET "flask-app"</b> SERVICE_URL </button>
+<!-- <div class="resizable ui-widget-content" style="display:block;position:absolute;top:0px;left:0px;border:1px solid red;">
+  <iframe name="flask-app" src="http://127.0.0.1:31406" allowtransparency="yes" scrolling="no" style="width:920px; height:26px; position:absolute; left:280px;top:0px;margin:0;padding:0;" > </iframe>
+</div>
+-->
 
-<div style="display:block;position:absolute;top:0px;left:0px;border:1px solid red;">
-  <iframe name="flask-app" src="SERVICE_URL" allowtransparency="yes" scrolling="no" style="width:820px; height:26px; position:absolute; left:380px;top:0px;margin:0;padding:0;" > </iframe>
+<div class="resizable ui-widget-content" style="display:block;position:absolute;top:0px;border:1px solid blue;">
+    <iframe id="terminal" name="terminal" src="TTYDURL" allowtransparency="yes" scrolling="yes" style="width:1000px; height:90px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
 </div>
 
-<div style="display:block;position:absolute;top:32px;border:1px solid blue;">
-    <iframe name="terminal" src="http://TTYD_URL" allowtransparency="yes" scrolling="yes" style="width:1000px; height:90px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
+<button id="hide_terminal" style="display:block;position:absolute;top:80px;border:1px solid blue;">Hide console</button>
+
+<div class="resizable ui-widget-content" style="display:block;position:absolute;top:100px;border:1px solid blue;">
+    <iframe name="visualizer" src="VISUURL" allowtransparency="yes" scrolling="yes" style="width:1000px; height:900px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
 </div>
 
-<div style="display:block;position:absolute;top:124px;border:1px solid blue;">
-    <iframe name="visualizer" src="VISUALIZER_URL" allowtransparency="yes" scrolling="yes" style="width:1000px; height:900px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
-</div>
+    <!-- JavaScript -->
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script>
+        $(document).ready( () => {
+            var hide_terminal=false;
+            //$("#hide_terminal").html("Hide console");
+
+            //var hide_terminal=true;
+            //$("#terminal").hide();
+
+            $("#hide_terminal").click(function(){
+                hide_terminal=!hide_terminal;
+                if (hide_terminal) {
+                    console.log("Hiding terminal");
+                    $("#terminal").hide();
+                    $("#hide_terminal").html("Show");
+                } else {
+                    console.log("Showing terminal");
+                    $("#terminal").show();
+                    $("#hide_terminal").html("Hide");
+                };
+            });
+        });
+    </script>
 
 </body>
 </html>
-
 
