@@ -746,13 +746,13 @@ const createCheckBoxText = (id, value, label, checkState) => {
     let checked='';
     if (checkState) { checked="checked='checked'"; }
 
-    let buttonDivText=`<div class="col"><input type="checkbox" id="${id}" name="${id}"${checked} value="${value}" /> <label for="${value}">${label}</label></div>`;
+    let checkBoxDivText=`<div class="col"><input type="checkbox" id="${id}" name="${id}"${checked} value="${value}" /> <label for="${value}">${label}</label></div>`;
     /*let showKubeCompButtonText='<div class="col">' +
         '<input type="checkbox" id="show_kubernetes" name="show_kubernetes" ' + checked + ' value="show_all" />' +
         '<label for="show_all">Show Kubernetes components</label>' +
       '</div>';*/
 
-    return buttonDivText;
+    return checkBoxDivText;
 };
 
 const createButtonText = (id, value, label) => {
