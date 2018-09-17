@@ -203,7 +203,7 @@
 .modalDialog {
     position: fixed;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     top: 0;
     right: 0;
     bottom: 0;
@@ -277,7 +277,8 @@ iframe {
 /* --------------------- Request Output ------------------- */
 
 .request_button {
-    background-color: #504caf;
+    /*background-color: #504caf;*/
+    background-color: #1e88e5;
     border-color: white;
     border-width: 1px;
     color: white;
@@ -297,6 +298,8 @@ iframe {
     border-width: 5px;
     padding: 5px;
     margin: 5px;
+    width: max-content;
+    height: max-content;
     /*font-weight: bold;*/
     /*color: #000010;
     background: #bbbbff;*/

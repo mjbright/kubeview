@@ -1,9 +1,11 @@
 
 :root {
     /*--normal-bg-color: rgba(80, 140, 255, 0.5);*/
-    --normal-bg-color:rgba(0, 0, 255, 0.1);
-    --normal-fg-color: black;
-    --normal-border-color: darkgray;
+    /*--normal-bg-color:rgba(0, 0, 255, 0.1);*/
+    --normal-bg-color: rgba(0, 255, 255, 0.2);
+    --normal-fg-color: darkblue;
+    /*--normal-fg-color: rgba(0, 255, 255, 1);*/
+    --normal-border-color: black;
 
     --main-bg-color:     grey;
     --main-border-width: 5px;*/
@@ -17,7 +19,7 @@
     /* Default color: for schedulable nodes - works, tainted masters */
     --sched-node-bg-color:     white;
     --sched-node-fg-color:     var(--normal-fg-color);
-    --sched-node-border-color: var(--normal-border-color);
+    --sched-node-border-color: rgba(3, 169, 244, 1);
 
     /* Color: for (untainted) masters */
     --unsched-node-bg-color: rgba(40, 80, 180, 0.1);
@@ -50,7 +52,7 @@
     --image-v2-bg-color: rgb(20, 220, 220);
     --image-v3-bg-color: rgb(40, 200, 200);
     --image-v4-bg-color: rgb(60, 180, 180);
-    --image-v5-bg-color: rgb(800, 160, 160);
+    --image-v5-bg-color: rgb(80, 160, 160);
 
     --image-vLATEST-bg-color:  var(--normal-bg-color);
     --image-vDEFAULT-bg-color: var(--normal-bg-color);

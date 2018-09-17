@@ -887,7 +887,7 @@ const createModalText = (type, object, href_content, id, markup) => {
         } ] );
 
         typeSpecific=`<h3>Service Link:</h3> ${getBUTTON}
-                      <a href="${path}"> ${href} </a> ${getOUTPUT} `;
+                      <br/><a href="${path}"> ${href} </a><hr/> ${getOUTPUT} <hr/>`;
     };
 
     const content=`<h1>${type}: ${object.metadata.name}</h1>
