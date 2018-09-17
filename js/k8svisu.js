@@ -849,23 +849,35 @@ const createModalText = (type, object, href_content, id, markup) => {
         const path = `/api/v1/namespaces/${namespace}/services/${object.metadata.name}/proxy/`;
         const href = `${rootURL}${path}`;
 
-
         const divid_button=object.metadata.name + '_buttonGET';
         const divid_output=object.metadata.name + '_buttonGET_OP';
 
-	getBUTTON=createButtonText(divid_button, "GET", "GET");
-        getOUTPUT=`<div id=${divid_output} class="request_output" > </div>`;
-	//console.log(`Pushing handler for ${divid_button}`);
+        getBUTTON=createButtonText(divid_button, "GET", "GET");
+        getOUTPUT=`<div id="${divid_output}" class="request_output" > </div>`;
+        //console.log(`Pushing handler for ${divid_button}`);
         handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
             let def = $.Deferred();
 
             //console.log(`Making GET request to ${path}`);
-	    //console.trace();
+            //console.trace();
             const serviceGETrequest = $.get(path, (data) => {
                 //console.log( "GET gotten ok ;-)");
                 //console.log( data );
-                $('#'+divid_output).html( data );
-                });
+                if ( (data.trim().toLowerCase().indexOf("<!doctype html>") == 0) ||
+                     (data.trim().toLowerCase().indexOf("<html>") == 0) ) {
+		    console.log('Embedding html page content in <iframe> tag');
+		    console.log(data);
+                    $('#'+divid_output).html( `<iframe srcdoc="${data}" />` );
+                 } else if (data.trim().indexOf("<") == 0) {
+		    console.log('Outputting html content directly');
+		    console.log(data);
+                    $('#'+divid_output).html( data );
+                 } else {
+		    console.log('Embedding text content in <pre> tag');
+		    console.log(data);
+                    $('#'+divid_output).html( `<pre> ${data} </pre>` );
+                 }
+            });
 
             const requests = [ serviceGETrequest ];
             $.when.apply( $, requests ).done( () => {
@@ -875,7 +887,7 @@ const createModalText = (type, object, href_content, id, markup) => {
         } ] );
 
         typeSpecific=`<h3>Service Link:</h3> ${getBUTTON}
-		      <a href="${path}"> ${href} </a> ${getOUTPUT} `;
+                      <a href="${path}"> ${href} </a> ${getOUTPUT} `;
     };
 
     const content=`<h1>${type}: ${object.metadata.name}</h1>
