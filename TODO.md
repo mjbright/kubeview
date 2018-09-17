@@ -12,6 +12,8 @@ Better color scheme, use blue.
 For DockerCon
 For Confoo.ca
 For DevConf.cz
+For UK Meetups
+For Lyon/GVA Meetups
 
 - Share with Herman
 
