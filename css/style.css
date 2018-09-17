@@ -277,20 +277,23 @@ iframe {
 /* --------------------- Request Output ------------------- */
 
 .request_button {
-    background-color: #af4c50;
-    border: none;
+    background-color: #504caf;
+    border: white;
+    border-width: 1px;
     color: white;
-    padding: 15px 32px;
+    padding: 5px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+    width: max-content;
+    height: max-content;
 }
 	
 .request_output {
-    font-size: 20px;
-    font-weight: bold;
-    color: blue;
-    background: white;
+    font-size: 15px;
+    /*font-weight: bold;*/
+    color: #000010;
+    background: #bbbbff;
 }
 
