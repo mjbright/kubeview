@@ -1,8 +1,12 @@
 #!/bin/bash
 
-TTYD_BASHRC=~/.dotfiles/ttyd.bashrc                               
-                                                                  
-[ ! -f $TTYD_BASHRC ] && die "No such rc file <$TTYD_BASHRC>"     
+TTYD_BASHRC=~/.dotfiles/ttyd.bashrc
+
+# If under cygwin launch windows script instead:
+[ -d /cygdrive ] && exec ${0%.sh}_win.sh
+
+
+[ ! -f $TTYD_BASHRC ] && die "No such rc file <$TTYD_BASHRC>"
 
 # On Ubuntu: ttyd -i enp3s0 -O -m 1 -S -d 14 -p 9001 bash
 
