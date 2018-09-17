@@ -1182,17 +1182,7 @@ const readCSSVariables = () => {
 };
 
 const initialLoad = () => {
-    // Initial jsPlumb load
-
     debug_log("LOAD @ " + jQuery.now());
-    jsPlumb.reset();
-
-    let instance = jsPlumb.getInstance({
-        ConnectionOverlays: connectionOverlays,
-        Container: "k8s_cluster",
-    });
-
-    jsPlumb.fire("jsPlumbStarted", instance);
 
     readCSSVariables();
     getClusterState();
@@ -1217,53 +1207,10 @@ const redrawAll = (info) => {
         addButtonHandler( divid, "GET", (id, label, divid_op) => { handler(id, label, divid_op); } );
     });
 
-    if (! enable_connects) {
-        return;
-    }
-
-    // Connect pods to their ReplicaSet:
-    pods.forEach( (pod, index) => {
-        owners = pod.metadata.ownerReferences;
-        owners.forEach( (owner, index) => {
-
-            //ownerReference
-            //[{ apiVersion: 'apps/v1', kind: 'Deployment', name: 'redis', uid: 'f8134aa4-b534-11e8-8a06-525400c9c704', controller: true, blockOwnerDeletion: true }]
-            // debug_connect( $.param( owner, true) );
-            debug_connect(`jsPlumb.connect( source[pod/${pod.metadata.name}]: ${pod.metadata.uid}, target[${owner.kind}/${owner.name}]: ${owner.uid} );`);
-
-            var common = {                                                                               
-                connector: ["Straight"],                                                                 
-                //anchor: ["Left", "Right"],                                                               
-                endpoint:"Dot",                                                                          
-                                                                                                                     
-                paintStyle:{ stroke:"darkblue", strokeWidth:1,  },                                      
-                endpointStyle:{ fill:"darkblue", outlineStroke:"darkblue", strokeWidth:0, outlineWidth:0 },           
-                                                                                                                     
-                //overlays:[ ["Arrow" , { width:12, length:12, location:0.67 }] ],                         
-                };                                                                                           
-
-            jsPlumb.connect({
-                source: pod.metadata.uid,
-                target: owner.uid,}, common);
-
-            /*jsPlumb.connect({
-                source: pod.metadata.uid,
-                target: owner.uid,
-                anchors: ["Bottom", "Bottom"],
-                paintStyle: {lineWidth: 5, strokeStyle: 'blue'},
-                joinStyle: "round",
-                endpointStyle: {fillStyle: 'blue', radius: 7},
-                connector: ["Flowchart", {cornerRadius: 5}]
-            });*/
-        });
-    });
-
-    //die("Check connections");
 };
 
 
 //-- Main: --------------------------------------------------------------------
 
-// your jsPlumb related init code goes here
-jsPlumb.ready( initialLoad );
+$(document).ready( initialLoad );
 

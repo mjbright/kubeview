@@ -17,7 +17,6 @@
 
     <!-- JavaScript -->
     <script src="js/jquery-3.3.1.min.js"></script>
-    <script src="js/jsplumb.min.js"></script>
     <script src="js/k8svisu.js"></script>
 
 </body>
