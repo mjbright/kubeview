@@ -13,22 +13,17 @@
 </head>
 <body>
 
-<!-- <div class="resizable ui-widget-content" style="display:block;position:absolute;top:0px;left:0px;border:1px solid red;">
-  <iframe name="flask-app" src="http://127.0.0.1:31406" allowtransparency="yes" scrolling="no" style="width:920px; height:26px; position:absolute; left:280px;top:0px;margin:0;padding:0;" > </iframe>
-</div>
--->
-
 <div class="resizable ui-widget-content" style="display:block;position:absolute;top:0px;border:1px solid blue;">
-    <iframe id="terminal" name="terminal" src="TTYDURL" allowtransparency="yes" scrolling="yes" style="width:1000px; height:90px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
+    <iframe id="terminal" name="terminal" src="TTYDURL" allowtransparency="yes" scrolling="yes" style="width:1280px; height:140px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
 </div>
 
-<div style="position:absolute;top:100px;" >
+<div style="position:absolute;top:145px;right:20px;" >
 <button id="hide_terminal" style="display:inline-block;" >Hide console</button>
 <button id="reload_iframe" style="display:inline-block;" >Reload cluster view</button>
 </div>
 
 <div class="resizable ui-widget-content" style="display:block;position:absolute;top:140px;border:1px solid blue;">
-    <iframe id="visualizer" name="visualizer" src="VISUURL" allowtransparency="yes" scrolling="yes" style="width:1000px; height:900px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
+    <iframe id="visualizer" name="visualizer" src="VISUURL" allowtransparency="yes" scrolling="yes" style="width:1280px; height:900px; position:absolute; left:2px;top:0px;margin:0;padding:0;" > </iframe>
 </div>
 
     <!-- JavaScript -->
