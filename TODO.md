@@ -17,6 +17,14 @@ For Lyon/GVA Meetups
 
 - Share with Herman
 
+# API Explorer
+Add some sort of API browser (based on swagger.json)
+Look here: https://github.com/swagger-api
+           https://swagger.io/tools/swagger-ui/
+           https://github.com/swagger-api/swagger-ui/issues/834
+           https://chrome.google.com/webstore/detail/swagger-ui-console/ljlmonadebogfjabhkppkoohjkjclfai?hl=en
+
+
 # jsPlumb
 Try this to connect Pods->ReplicaSet(or other cllr)->Deploy->Service
 
