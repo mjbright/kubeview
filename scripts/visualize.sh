@@ -9,7 +9,19 @@ TTYDPORT=9001
 
 #kubectl proxy --www=/Users/mjb/src/git/brendandburns.gcp-live-k8s-visualizer --www-prefix=/my-mountpoint/ --api-prefix=/api/
 
-SRC_DIR=$(dirname $0)/..
+SCRIPT=$(readlink -f $0)
+SCRIPT_DIR=${SCRIPT%/*}
+SRC_DIR=${SCRIPT_DIR%/*}
+
+HOST=$(hostname)
+
+#RUN_DIR=$SRC_DIR/tmp/$HOST
+RUN_DIR=$SRC_DIR/
+echo $RUN_DIR
+#exit 0
+
+INDEX_HTML=$RUN_DIR/$HOST.html
+DASHBOARD_HTML=$RUN_DIR/$HOST.dashboard.html
 
 die() {
     echo "$0: die - $*" >&2
@@ -35,17 +47,17 @@ while [ ! -z "$1" ];do
                   shift; CLIENT_IP=$1
               else
                   CLIENT_IP=0.0.0.0
-	      fi
+          fi
               #OPTS+="--accept-hosts='^localhost$,^127\.0\.0\.1$,$CLIENT_IP'"
               OPTS+=" --address=$IP --accept-hosts='^${CLIENT_IP}$'"
-	      # --accept-hosts='^localhost$,^127\.0\.0\.1$,^\[::1\]$'
-	      ;;
+          # --accept-hosts='^localhost$,^127\.0\.0\.1$,^\[::1\]$'
+          ;;
 
         -mjb) SRC_DIR=~/src/git/GIT_mjbright/codeeurope-microservices/live-k8s-visualizer ;;
         \.)   SRC_DIR=.;;
         -l)   SRC_DIR=~/src/git/larrycai.gcp-live-k8s-visualizer;;
 
-	*)    die "Bad option <$1>";;
+    *)    die "Bad option <$1>";;
     esac
     shift
 done
@@ -53,7 +65,7 @@ done
 # Take into account ssh tunneling:
 [ -z "$VISU_PORT" ] && VISU_PORT=$PORT
 
-VISUURL=http://127.0.0.1:$VISU_PORT/static
+VISUURL=http://127.0.0.1:$VISU_PORT/static/$HOST.html
 TTYDURL=http://127.0.0.1:$TTYDPORT
 
 modify_template() {
@@ -73,7 +85,11 @@ modify_template() {
 }
 
 add_source_tooltip() {
-   SOURCEURL=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
+   # Sometimes (git) failing under cygwin:
+   # SOURCEURL=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
+
+   SOURCEURL=$(awk '/url = / { print $3; }' .git/config |
+               sed -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
    [ -z "$SOURCEURL" ] && SOURCEURL=$PWD
 
    # TODO:
@@ -91,15 +107,20 @@ add_source_tooltip() {
    CLUSTER=${CONTEXT#*@};
    #echo $CLUSTER
 
-    modify_template index.html     index.html.template
-    modify_template dashboard.html dashboard.html.template
+    modify_template $INDEX_HTML     index.html.template
+    modify_template $DASHBOARD_HTML dashboard.html.template
 }
 
 add_source_tooltip
+echo SOURCEURL=$SOURCEURL
+echo VISUURL=$VISUURL
+echo TTYDURL=$TTYDURL
 
-#kubectl proxy $OPTS  --www=$SRC_DIR --www-prefix=/ --api-prefix=/api/ --port $PORT
+
+cd $RUN_DIR/
+pwd
 set -x
-kubectl proxy $OPTS  --www=$SRC_DIR --www-prefix=/static/ --port $PORT
+kubectl proxy $OPTS  --www=. --www-prefix=/static/ --port $PORT
 set +x
 
 
