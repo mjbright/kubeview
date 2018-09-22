@@ -21,6 +21,15 @@
     width: 100%; height: max-content;
 }
 
+.pseudo {
+    // TODO: Use border-image to modigfy border-style
+    //       https://stackoverflow.com/questions/2771171/control-the-dashed-border-stroke-length-and-distance-between-strokes
+
+    border-radius: 25px; border-style: dashed; border-width: var(--main-border-width);
+    border-color: var(--pseudo-border-color);
+    background: var(--pseudo-bg-color);
+}
+
 .notready {
     border-color: var(--notready-border-color);
     background: var(--notready-bg-color);
