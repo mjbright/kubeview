@@ -20,6 +20,9 @@ let getversion=true; /* Once only */
 
 let kube_version=undefined;
 
+const stayingAlive  = true; /* Be permissive and never die !! */
+const allowNoMaster = true; /* Needed for managed platforms such as AKS */
+
 let imagev1bgcolor = undefined;
 let imagev2bgcolor = undefined;
 let imagev3bgcolor = undefined;
@@ -102,8 +105,12 @@ const connectionOverlays = [
 const capitalize1stChar = (word) => { let tmp=word; return tmp.replace(/^\w/, c => c.toUpperCase()); };
 
 const die = (msg) => {
-    console.log('die: ' + msg);
-    throw '';
+    if (stayingAlive) {
+        console.log('error: ' + msg);
+    } else {
+        console.log('die: ' + msg);
+        throw '';
+    }
 };
 
 const setPaths = (namespace) => {
@@ -424,7 +431,11 @@ const getMasterIndex = (nodes) => {
     });
 
     if (masterIdx == undefined) {
-        console.log("Failed to detect Master node");
+        if (!allowNoMaster) {
+            //console.log("Failed to detect Master node");
+            die("Failed to detect Master node");
+        }
+        return [undefined,undefined]
     }
     // debug_log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
 
