@@ -425,13 +425,21 @@ const getMasterIndex = (nodes) => {
     let masterIdx=undefined;
 
     nodes.forEach( (node, index)      => {
+        //console.log(`NODE-NAME: <${node.metadata.name}>`);
         if ("node-role.kubernetes.io/master" in node.metadata.labels) {
-            // UNUSED: name = '*' + node.metadata.name;
-            // UNUSED: role = 'master';
             masterIdx=index;
             master=nodes[index];
-            //debug_log("MASTER=" + index);
+            //console.log("MASTER ROLE FOUND" + index);
+            debug_log("MASTER=" + index);
+            return [masterIdx, master.metadata.name];
         }
+        /* if (node.metadata.name == "docker-for-desktop") {
+            masterIdx=index;
+            master=nodes[index];
+            //console.log(`MASTER IDX=${index} NODE-NAME: <${node.metadata.name}>`);
+            console.log("Docker-for-desktop name FOUND" + index);
+            debug_log("MASTER=" + index);
+        } */
     });
 
     if (masterIdx == undefined) {
@@ -441,7 +449,8 @@ const getMasterIndex = (nodes) => {
         }
         return [undefined,undefined];
     }
-    // debug_log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
+    //console.log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
+    debug_log(`MASTER=node[${masterIdx}]=${master.metadata.name}'`);
 
     return [masterIdx, master.metadata.name];
 };
@@ -768,12 +777,17 @@ const createPodDiv = (object, nodeIndex) => {
     //debug_pod(`${object.metadata.name} is '${object.status.phase}' on node[${nodeIndex}] '${object.spec.nodeName}'`);
 
     classes="pod";
-    if (nodes[nodeIndex].lastPodImage == undefined) {
+    if (!nodes[nodeIndex]) { // Why would this happen?
+        classes += " row";
+	console.log(`nodes[${nodeIndex}] is undefined for pod ${object.metadata.name} (nodes.length=${nodes.length})`);
+    } else if (nodes[nodeIndex].lastPodImage == undefined) {
         classes += " row";
     } else if (nodes[nodeIndex].lastPodImage == image) {
         classes += " col";
     }
-    nodes[nodeIndex].lastPodImage=image;
+    if (nodes[nodeIndex]) { // Why would this happen?
+        nodes[nodeIndex].lastPodImage=image;
+    }
 
     const objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
     const content="";
@@ -1077,10 +1091,15 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
     let masterIdx = retList[0];
     let masterNode = retList[1];
 
-    if (!masterIdx) {
+    //console.log(`masterIdx: ${masterIdx}`);
+    //if (!masterIdx) { console.log(`NOT masterIdx: ${masterIdx}`); };
+    //if (masterIdx == undefined) { console.log(`UNDEF masterIdx: ${masterIdx}`); };
+
+    if (masterIdx == undefined) {
         // Create a pseudo-master to display services, replicas:
         masterIdx=0;
-        masterNode={};
+	//die("WHY?");
+
         masterNode={
             "metadata": {
                 "pseudo": "True",
