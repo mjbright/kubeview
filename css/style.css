@@ -209,6 +209,11 @@
 
 /* ------------------------ Modals ------------------------ */
 
+.scroll_auto {
+    height: 300px;
+    overflow:auto;
+}
+
 .modalDialog {
     position: fixed;
     font-family: Arial, Helvetica, sans-serif;
@@ -226,6 +231,9 @@
     transition: opacity 400ms ease-in;
     pointer-events: none;
 }
+
+.modalDialog ul {margin-left: 0px; padding-left: 6px;}
+.modalDialog li {margin-left: 0px; padding-left: 6px;}
 
 .modalDialog:target {
     opacity:1;
