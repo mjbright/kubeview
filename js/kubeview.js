@@ -925,10 +925,12 @@ const createModalText = (type, object, href_content, id, markup) => {
         const divid_output=object.metadata.name + "_buttonGET_OP";
 
         getBUTTON=createButtonText(divid_button, "GET", "GET");
-        getOUTPUT=`<div id="${divid_output} class="request_output scroll_auto" > </div>`;
+        getOUTPUT=`<div id="${divid_output}" class="request_output scroll_auto" > </div>`;
         //console.log(`Pushing handler for ${divid_button}`);
         handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
             let def = $.Deferred();
+
+            let hash_divid_output = "#" + divid_output;
 
             //console.log(`Making GET request to ${path}`);
             //console.trace();
@@ -938,17 +940,17 @@ const createModalText = (type, object, href_content, id, markup) => {
                 size = data.length;
                 if ( (data.trim().toLowerCase().indexOf("<!doctype html>") == 0) ||
                      (data.trim().toLowerCase().indexOf("<html>") == 0) ) {
-		    console.log(`[${size}by]: Embedding html page content in <iframe> tag`);
+		    console.log(`[${size}by]: Embedding html page content in <iframe> tag in div '${hash_divid_output}`);
 		    //console.log(data);
-                    $("#"+divid_output).html( `<iframe srcdoc="${data}" />` );
+                    $(hash_divid_output).html( `<iframe srcdoc="${data}" />` );
                  } else if (data.trim().indexOf("<") == 0) {
-		    console.log(`[${size}by]: Outputting html content directly`);
+		    console.log(`[${size}by]: Outputting html content directly in div '${hash_divid_output}`);
 		    //console.log(data);
-                    $("#"+divid_output).html( data );
+                    $(hash_divid_output).html( data );
                  } else {
-		    console.log(`[${size}by]: Embedding text content in <pre> tag`);
+		    console.log(`[${size}by]: Embedding text content in <pre> tag in div '${hash_divid_output}`);
 		    //console.log(data);
-                    $("#"+divid_output).html( `<pre> ${data} </pre>` );
+                    $(hash_divid_output).html( `<pre> ${data} </pre> in div '${hash_divid_output}` );
                  }
             });
 
