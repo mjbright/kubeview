@@ -2,7 +2,4 @@ BACKUPS
 tutorials
 LDLC_3node_k8s_services_info.txt
 LATEST
-carbon.dashboard.html
-carbon.html
-mike1.hpintelco.org.dashboard.html
-mike1.hpintelco.org.html
+*.html
