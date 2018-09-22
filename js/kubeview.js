@@ -140,6 +140,7 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
             type_info="Node: ";
         } else if (type == 'service') {
             type_info="Service: ";
+            //console.log(`SERVICE TEXT ${text}`)
         } else if (type == 'deployment') {
             type_info="Deploy: ";
         } else if (type == 'replicaset') {
@@ -191,6 +192,7 @@ ${tooltip}`;
         debug_node(stElemDiv+' </div>');
     } else if (type == 'service') {
         debug_svc(stElemDiv+' </div>');
+        //console.log(stElemDiv+' </div>');
     } else if (type == 'deployment') {
         debug_dep(stElemDiv+' </div>');
     } else if (type == 'replicaset') {
@@ -477,14 +479,34 @@ const createDeploymentDiv = (object) => {
 
     const objectDiv = createElemDiv("deployment col", object, objectText, x, y, tooltip);
     //return objectDiv;
-    const content=`
-		<ul>
-		<li>Replicas: ${replicasForModal}</li>
-		</ul>
-		`;
+    const content=` <br/> <b>Replicas</b>: ${replicasForModal} `;
     const modalDiv = createModalText('Deployment', object, objectDiv, object.metadata.uid, content)
     return modalDiv;
 };
+
+/*
+inspect(body):
+{ kind: 'Service',
+  apiVersion: 'v1',
+  metadata:
+   { name: 'fancypants',
+     namespace: 'default',
+     selfLink: '/api/v1/namespaces/default/services/fancypants',
+     uid: '711afd87-bd8c-11e8-b8b2-d6f27a9f8bb3',
+     resourceVersion: '15563',
+     creationTimestamp: '2018-09-21T10:52:32Z',
+     annotations:
+      { 'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"fancypants","namespace":"default"},"spec":{"ports":[{"port":80}],"selector":{"app":"fancypants"},"type":"LoadBalancer"}}\n' } },
+  spec:
+   { ports:
+      [ { protocol: 'TCP', port: 80, targetPort: 80, nodePort: 30696 } ],
+     selector: { app: 'fancypants' },
+     clusterIP: '10.0.143.85',
+     type: 'LoadBalancer',
+     sessionAffinity: 'None',
+     externalTrafficPolicy: 'Cluster' },
+  status: { loadBalancer: { ingress: [ { ip: '137.117.192.44' } ] } } }
+*/
 
 const createServiceDiv = (object) => {
     // spec: { ports: [ { protocol: 'TCP', port: 5000, targetPort: 5000, nodePort: 31896 } ],
@@ -880,18 +902,19 @@ const createModalText = (type, object, href_content, id, markup) => {
             const serviceGETrequest = $.get(path, (data) => {
                 //console.log( "GET gotten ok ;-)");
                 //console.log( data );
+                size = data.length;
                 if ( (data.trim().toLowerCase().indexOf("<!doctype html>") == 0) ||
                      (data.trim().toLowerCase().indexOf("<html>") == 0) ) {
-		    console.log('Embedding html page content in <iframe> tag');
-		    console.log(data);
+		    console.log(`[${size}by]: Embedding html page content in <iframe> tag`);
+		    //console.log(data);
                     $('#'+divid_output).html( `<iframe srcdoc="${data}" />` );
                  } else if (data.trim().indexOf("<") == 0) {
-		    console.log('Outputting html content directly');
-		    console.log(data);
+		    console.log(`[${size}by]: Outputting html content directly`);
+		    //console.log(data);
                     $('#'+divid_output).html( data );
                  } else {
-		    console.log('Embedding text content in <pre> tag');
-		    console.log(data);
+		    console.log(`[${size}by]: Embedding text content in <pre> tag`);
+		    //console.log(data);
                     $('#'+divid_output).html( `<pre> ${data} </pre>` );
                  }
             });
@@ -1157,11 +1180,12 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
      nodes.forEach( (node, index)      => {
          objectDiv = nodeDivText[index] + ' </div>';
          const content='';
-         const modalDiv = createModalText('Node', node, objectDiv, "NODE", content);
+         //console.log(`**node[${index}]: ${objectDiv}**`)
+         //console.log(`**node[${index}]**`);
+         const modalDiv = createModalText('Node', node, objectDiv, `NODE_${index}`, content);
          //ALL_info += objectDiv;
          ALL_info += modalDiv;
      });
-
 
      // Redraw cluster only when changes are detected:
      if ( force_redraw || detectChanges() ) {
