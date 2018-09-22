@@ -940,15 +940,15 @@ const createModalText = (type, object, href_content, id, markup) => {
                 size = data.length;
                 if ( (data.trim().toLowerCase().indexOf("<!doctype html>") == 0) ||
                      (data.trim().toLowerCase().indexOf("<html>") == 0) ) {
-		    console.log(`[${size}by]: Embedding html page content in <iframe> tag in div '${hash_divid_output}`);
+		    console.log(`[${size}by]: Embedding html page content in <iframe> tag in div '${hash_divid_output}'`);
 		    //console.log(data);
                     $(hash_divid_output).html( `<iframe srcdoc="${data}" />` );
                  } else if (data.trim().indexOf("<") == 0) {
-		    console.log(`[${size}by]: Outputting html content directly in div '${hash_divid_output}`);
+		    console.log(`[${size}by]: Outputting html content directly in div '${hash_divid_output}'`);
 		    //console.log(data);
                     $(hash_divid_output).html( data );
                  } else {
-		    console.log(`[${size}by]: Embedding text content in <pre> tag in div '${hash_divid_output}`);
+		    console.log(`[${size}by]: Embedding text content in <pre> tag in div '${hash_divid_output}'`);
 		    //console.log(data);
                     $(hash_divid_output).html( `<pre> ${data} </pre> in div '${hash_divid_output}` );
                  }
