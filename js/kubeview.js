@@ -219,6 +219,8 @@ const detectChanges = () => {
         configHash += node.metadata.uid
     // todo state:
     });
+    configHash += namespaces.join(",");
+
     services.forEach( (service, index) => {
         configHash += service.metadata.uid
     // todo state ??:
@@ -518,14 +520,19 @@ const createServiceDiv = (object) => {
     });
 
     let objectText=`${object.metadata.name}`;
-    if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run}`; }
+    if (object.metadata.labels && object.metadata.labels.run) {
+        objectText=`${object.metadata.labels.run}`;
+    }
     //if (object.metadata.labels.run) { objectText=`${object.metadata.labels.run} [${replicas}]`; }
 
     let tooltip="";
     let x=0;
     let y=0;
 
+    // console.log(`service ${object.metadata.name}: node_port ${node_port}`)
+
     if (node_port != undefined) {
+        // console.log(`service ${object.metadata.name}: NODE_PORT ${node_port}`)
         // objectText += ' [NodePort: ' + node_port + ']';
         objectText += ' [' + node_port + ']';
         tooltip += `NodePort: ${node_port}`;
@@ -800,15 +807,19 @@ const createCheckBoxText = (id, value, label, checkState) => {
 const createButtonText = (id, value, label) => {
 
     //let buttonDivText=`<div class="col"><input type="button" id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
-    let buttonDivText=`<div class="col "><button class="request_button" id="${id}" name="${id} value="${value}" > ${label} </button> </div>`;
+    let buttonDivText=`<div class="col "><button class="request_button" id="${id}" name="${id}" value="${value}" > ${label} </button> </div>`;
 
     return buttonDivText;
 };
 
 const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
-    let button = document.querySelector(`#${id}`);
+    let checkBox = document.querySelector(`#${id}`);
 
-    button.addEventListener('click', (e) => {
+    if (checkBox == null) {
+        console.log(`addCheckBoxHandler: Failed to select id: Adding eventListener/handler to #${id}`);
+        return;
+    }
+    checkBox.addEventListener('click', (e) => {
         checkState_obj.state = !checkState_obj.state;
         debug_log(`Button ${id} clicked, '${label}' state now: ${checkState_obj.state}`);
 	handler(id, label, checkState_obj);
@@ -818,6 +829,10 @@ const addCheckBoxHandler = (id, label, checkState_obj, handler) => {
 const addButtonHandler = (id, label, handler) => {
     let button = document.querySelector(`#${id}`);
 
+    if (button == null) {
+        console.log(`addButtonHandler: Failed to select id: Adding eventListener/handler to #${id}`);
+        return;
+    }
     //console.log(`Adding eventListener/handler to #${id}`);
     button.addEventListener('click', (e) => {
         debug_log(`Button ${id} clicked, '${label}'`);
@@ -827,21 +842,23 @@ const addButtonHandler = (id, label, handler) => {
 
 const createModalText = (type, object, href_content, id, markup) => {
 
-    const labelsAnnotations = getHTMLLabelsAnnotations(object);
+    // const labelsAnnotations = getHTMLLabelsAnnotations(object);
+    const labelsAnnotations = '';
+
     const image = getImage(object);
     let imageText = undefined;
 
     if (image == undefined) {
         imageText = '';
     } else {
-        imageText = `<h3>Image: ${image}</h3>`;
+        imageText = `<b>Image</b>: ${image}`;
     }
 
     let selfLink='';
     if (object.metadata.selfLink) {
-        selfLink=`<h3>selfLink:
-	    <a href="${object.metadata.selfLink}"> ${object.metadata.selfLink} </a>
-		    </h3>`;
+        selfLink=`<br/> <b>selfLink</b>:
+           <a href="${object.metadata.selfLink}"> ${object.metadata.selfLink}
+           </a>`;
     }
 
     let typeSpecific='';
@@ -855,29 +872,31 @@ const createModalText = (type, object, href_content, id, markup) => {
     * window.location.assign loads a new document
     */
     if (getType(object) == 'pod') {
-        typeSpecific="<h3>Addresses</h3>";
+        typeSpecific += "<br/> <b>Addresses</b>";
 
-        typeSpecific += `<h4>Host-ip: ${object.status.hostIP}</h4>`;
-        typeSpecific += `<h4>Pod-ip: ${object.status.podIP}</h4>`;
+        typeSpecific += `<br/> <b>Host-ip</b>: ${object.status.hostIP}`;
+        typeSpecific += `<br/> <b>Pod-ip</b>: ${object.status.podIP}`;
     }
 
     if (getType(object) == 'node') {
-        typeSpecific="<h3>Addresses</h3>";
+        //console.log(`Node modal ${object.metadata.name}`);
+        typeSpecific += "<h3>Addresses</h3>";
 
         Object.keys(object.metadata.annotations).forEach( (key, index) => {
             // Works with flannel at least ...
 	    if (key.indexOf("public-ip") != -1) {
                 const ip = object.metadata.annotations[key];
-                typeSpecific += `<h4>Public-ip: ${ip}</h4>`;
+                typeSpecific += `<br/> <b>Public-ip</b>: ${ip}`;
 	    }
 	});
 
-        typeSpecific += '<ul>';
+        //typeSpecific += '<ul>';
 	object.status.addresses.forEach( (address, index) => {
-            typeSpecific += `<li> ${address.type}: ${address.address} </li>`;
+            //typeSpecific += `<li> ${address.type}: ${address.address} </li>`;
+            typeSpecific += `<br/> <b> ${address.type}</b>: ${address.address} </li>`;
 
 	});
-        typeSpecific += '</ul>';
+        //typeSpecific += '</ul>';
     };
 
     if (getType(object) == 'service') {
@@ -892,7 +911,7 @@ const createModalText = (type, object, href_content, id, markup) => {
         const divid_output=object.metadata.name + '_buttonGET_OP';
 
         getBUTTON=createButtonText(divid_button, "GET", "GET");
-        getOUTPUT=`<div id="${divid_output}" class="request_output" > </div>`;
+        getOUTPUT=`<div id="${divid_output} class="request_output scroll_auto" > </div>`;
         //console.log(`Pushing handler for ${divid_button}`);
         handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
             let def = $.Deferred();
@@ -926,16 +945,18 @@ const createModalText = (type, object, href_content, id, markup) => {
             });
         } ] );
 
-        typeSpecific=`<h3>Service Link:</h3> ${getBUTTON}
+        // console.log(getBUTTON);
+        typeSpecific += `<h3>Service Link:</h3> ${getBUTTON}
                       <br/><a href="${path}"> ${href} </a><hr/> ${getOUTPUT} <hr/>`;
     };
 
-    const content=`<h1>${type}: ${object.metadata.name}</h1>
-                 <h3>UID: ${object.metadata.uid}</h3>
+    const content=`<h2><u>${type}</u>: ${object.metadata.name}
+                 <br/> UID: ${object.metadata.uid}</h2>
                 ${imageText}
                 ${selfLink}
                 ${typeSpecific}
                 ${labelsAnnotations}
+<hr/>
                 ${markup}
 		`;
 
@@ -951,7 +972,8 @@ const createModalText = (type, object, href_content, id, markup) => {
 	${content}
         <div class="scroll_auto"> ${inspectText} </div>
       </div>
-      </div>`;
+      </div>
+    `;
 
     return modalText;
 };
@@ -1054,6 +1076,29 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
     const retList = getMasterIndex(nodes);
     let masterIdx = retList[0];
     let masterNode = retList[1];
+
+    if (!masterIdx) {
+        // Create a pseudo-master to display services, replicas:
+        masterIdx=0;
+        masterNode={};
+        masterNode={
+            'metadata': {
+                'pseudo': 'True',
+                'uid': 'pseudo-master(s)',
+                'name': 'pseudo-master(s) [Managed Cluster]',
+                'labels': {
+                    'node-role.kubernetes.io/master': '',
+                 },
+            },
+            'status': {
+                'conditions': [ { 'Ready': 'True' } ],
+            },
+            'spec': {
+                'taints': [ ],
+            },
+        }
+        nodes.unshift(masterNode)
+    }
     debug_node(`MASTER=node[${masterIdx}]=${masterNode}'`);
 
     nodes.forEach( (node, index)      => {
@@ -1118,12 +1163,15 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
             }
         }
 
+        if (node.metadata.pseudo) { classes += " pseudo"; }
+
         const objectDiv='';
         const content='';
         const object=node;
 
         stElemDiv = startElemDiv(classes, node, nodeDivText[index], x, y, tooltip);
         nodeDivText[index] = stElemDiv;
+        //console.log(`node[${index}]: ${stElemDiv}`)
         //if (index != masterIdx) {
 	/* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
         nodeDivText[index] += '<p style="padding: 0px; margin: 5px;" />';
