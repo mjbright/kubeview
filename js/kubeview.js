@@ -9,6 +9,8 @@ let deployments = [];
 let replicasets = [];
 let pods = [];
 let ids_seen = [];
+let ids_seen_type = [];
+let ids_seen_name = [];
 let configHash='';
 let force_redraw=false;
 
@@ -159,9 +161,11 @@ ${tooltip}`;
     //debug_color(`fg: ${fg} bg:${bg}`);
     itemSeenIdx = indexOfUIDInList(ids_seen, uid);
     if (itemSeenIdx != -1) {
-        die("id seen already: " + uid);
+        die(`${type}: id <${uid}> name <${name}> already seen (with type ${ids_seen_type[itemSeenIdx]}, name ${ids_seen_name[itemSeenIdx]})`);
     }
     ids_seen.push( uid );
+    ids_seen_type.push( type );
+    ids_seen_name.push( name );
 
     classes += " tooltip";
     let datatip = ` data-tip=""`;
@@ -298,8 +302,10 @@ const getClusterState = () => {
     const getrs=true;
     const getpods=true;
 
-    ids_seen = [];
 
+    ids_seen = [];
+    ids_seen_type = [];
+    ids_seen_name = [];
     nodes = [];
     namespaces = [];
     deployments = [];
