@@ -7,6 +7,9 @@
     /*--normal-fg-color: rgba(0, 255, 255, 1);*/
     --normal-border-color: black;
 
+    --pseudo-border-color: rgb(125, 125, 0);
+    --pseudo-bg-color: rgba(255, 255, 220, 0.4);
+
     --main-bg-color:     grey;
     --main-border-width: 5px;*/
     --main-border-color: #008;
