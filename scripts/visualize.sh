@@ -15,14 +15,6 @@ SRC_DIR=${SCRIPT_DIR%/*}
 
 HOST=$(hostname)
 
-#RUN_DIR=$SRC_DIR/tmp/$HOST
-RUN_DIR=$SRC_DIR/
-echo $RUN_DIR
-#exit 0
-
-INDEX_HTML=$RUN_DIR/$HOST.html
-DASHBOARD_HTML=$RUN_DIR/$HOST.dashboard.html
-
 die() {
     echo "$0: die - $*" >&2
     exit 1
@@ -61,6 +53,13 @@ while [ ! -z "$1" ];do
     esac
     shift
 done
+
+#RUN_DIR=$SRC_DIR/tmp/${HOST}_p${PORT}
+RUN_DIR=$SRC_DIR/
+echo $RUN_DIR
+#exit 0
+INDEX_HTML=$RUN_DIR/${HOST}_p${PORT}.html
+DASHBOARD_HTML=$RUN_DIR/${HOST}_p${PORT}.dashboard.html
 
 # Take into account ssh tunneling:
 [ -z "$VISU_PORT" ] && VISU_PORT=$PORT
