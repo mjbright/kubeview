@@ -71,13 +71,13 @@ modify_template() {
     HTML=$1; shift;
     TEMPLATE=$1; shift;
 
-    sed \
+    { cd $SRC_DIR; sed \
         -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" \
         -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
         -e "s_CLUSTERNAME='CLUSTERNAME'_CLUSTERNAME='$CLUSTER'_" \
         -e "s_TTYDURL_${TTYDURL}_" \
         -e "s_VISUURL_${VISUURL}_" \
-            $TEMPLATE > $HTML
+            $TEMPLATE > $HTML; }
 
     ls -al $HTML
     [ ! -s $HTML ] && die "Failed to create $HTML from template"
@@ -87,7 +87,7 @@ add_source_tooltip() {
    # Sometimes (git) failing under cygwin:
    # SOURCEURL=$(git remote -v 2>/dev/null | sed -e '1d' -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
 
-   SOURCEURL=$(awk '/url = / { print $3; }' .git/config |
+   SOURCEURL=$(cd $SRC_DIR; awk '/url = / { print $3; }' .git/config |
                sed -e 's/.*github.com/https:\/\/github.com/' -e 's/ .*//')
    [ -z "$SOURCEURL" ] && SOURCEURL=$PWD
 
