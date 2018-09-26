@@ -754,7 +754,7 @@ const createPodDiv = (object, nodeIndex) => {
     const image=object.spec.containers[0].image;
     const image_version=getImageVersion(object);
 
-    if (object.metadata.labels.run) {
+    if (object.metadata.labels && object.metadata.labels.run) {
         let postfix=objectText.substr(objectText.lastIndexOf("-"));
 	objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
     }
