@@ -868,14 +868,41 @@ const createModalText = (type, object, href_content, id, markup) => {
         imageText = `<b>Image</b>: ${image}`;
     }
 
+    let typeSpecific="";
+
     let selfLink="";
-    if (object.metadata.selfLink) {
+    if (object.metadata && object.metadata.selfLink) {
         selfLink=`<br/> <b>selfLink</b>:
            <a href="${object.metadata.selfLink}"> ${object.metadata.selfLink}
            </a>`;
-    }
 
-    let typeSpecific="";
+        const divid_del_button=object.metadata.name + "_buttonDELETE";
+        const divid_del_output=object.metadata.name + "_buttonDELETE_OP";
+
+        deleteBUTTON=createButtonText(divid_del_button, "DELETE", "DELETE");
+        deleteOUTPUT=`<div id="${divid_del_output}" class="request_output scroll_auto" > </div>`;
+        handlerList.push( [ divid_del_button, divid_del_output, (id, label, divid_op) => {
+            let def = $.Deferred();
+            let hash_divid_output = "#" + divid_op;
+
+            const path = object.metadata.selfLink;
+            //console.log("DELETE " + path);
+
+            $.ajax({
+                url: path,
+                method: 'DELETE',
+                contentType: 'application/json',
+                success: function(result) {
+                    console.log(`DELETEd ${path}`);
+                },
+                error: function(request, msg, err) {
+                    console.log(`FAILED to DELETE ${path}`);
+                    console.log(msg);
+                    console.log(err);
+                }
+            });
+        }]);
+    };
 
     // http://127.0.0.1:18002/api/v1/namespaces/default/services/flask-app/proxy/
     /*
@@ -924,13 +951,14 @@ const createModalText = (type, object, href_content, id, markup) => {
         const divid_button=object.metadata.name + "_buttonGET";
         const divid_output=object.metadata.name + "_buttonGET_OP";
 
+
         getBUTTON=createButtonText(divid_button, "GET", "GET");
         getOUTPUT=`<div id="${divid_output}" class="request_output scroll_auto" > </div>`;
         //console.log(`Pushing handler for ${divid_button}`);
-        handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
-            let def = $.Deferred();
 
-            let hash_divid_output = "#" + divid_output;
+        handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
+
+            let hash_divid_output = "#" + divid_op;
 
             //console.log(`Making GET request to ${path}`);
             //console.trace();
@@ -969,7 +997,7 @@ const createModalText = (type, object, href_content, id, markup) => {
     const content=`<h2><u>${type}</u>: ${object.metadata.name}
                  <br/> UID: ${object.metadata.uid}</h2>
                 ${imageText}
-                ${selfLink}
+                ${selfLink} ${deleteBUTTON} ${deleteOUTPUT}
                 ${typeSpecific}
                 ${labelsAnnotations}
 <hr/>
