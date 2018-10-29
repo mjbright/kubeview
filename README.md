@@ -1,4 +1,4 @@
-# k8s-visu
+# KubeView
 
 A visualization tool for Kubernetes clusters
 
