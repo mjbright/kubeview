@@ -871,19 +871,21 @@ const createModalText = (type, object, href_content, id, markup) => {
     let typeSpecific="";
 
     let selfLink="";
+    deleteBUTTON="<p>Cannot Delete (no object.metadata.selfLink)<p/>";
+    deleteOUTPUT="";
     if (object.metadata && object.metadata.selfLink) {
         selfLink=`<br/> <b>selfLink</b>:
            <a href="${object.metadata.selfLink}"> ${object.metadata.selfLink}
            </a>`;
 
-        const divid_del_button=object.metadata.name + "_buttonDELETE";
-        const divid_del_output=object.metadata.name + "_buttonDELETE_OP";
+        var divid_del_button=object.metadata.name + "_buttonDELETE";
+        var divid_del_output=object.metadata.name + "_buttonDELETE_OP";
 
         deleteBUTTON=createButtonText(divid_del_button, "DELETE", "DELETE");
         deleteOUTPUT=`<div id="${divid_del_output}" class="request_output scroll_auto" > </div>`;
         handlerList.push( [ divid_del_button, divid_del_output, (id, label, divid_op) => {
             let def = $.Deferred();
-            let hash_divid_output = "#" + divid_op;
+            var hash_divid_output = "#" + divid_op;
 
             const path = object.metadata.selfLink;
             //console.log("DELETE " + path);
@@ -954,11 +956,11 @@ const createModalText = (type, object, href_content, id, markup) => {
 
         getBUTTON=createButtonText(divid_button, "GET", "GET");
         getOUTPUT=`<div id="${divid_output}" class="request_output scroll_auto" > </div>`;
-        //console.log(`Pushing handler for ${divid_button}`);
+        console.log(`Pushing handler for ${divid_button}//${divid_output}`);
 
         handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
 
-            let hash_divid_output = "#" + divid_op;
+            var hash_divid_output = "#" + divid_op;
 
             //console.log(`Making GET request to ${path}`);
             //console.trace();
@@ -1396,10 +1398,10 @@ const redrawAll = (info) => {
 
     // NOW we can add in handlers:
     handlerList.forEach( ( handler_info, index ) => {
-        const divid=handler_info[0];
-        const divid_op=handler_info[1];
-        const handler=handler_info[2];
-        //console.log(`Adding handler for ${divid} + handler`);
+        var divid=handler_info[0];
+        var divid_op=handler_info[1];
+        var handler=handler_info[2];
+        console.log(`Adding handler for ${divid}//${divid_op} + handler`);
         addButtonHandler( divid, "GET", (id, label, divid_op) => { handler(id, label, divid_op); } );
     });
 
