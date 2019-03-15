@@ -5,7 +5,8 @@
 #PORT=8001
 PORT=8002
 
-TTYDPORT=9001
+#TTYDPORT=9001
+TTYDPORT=9999
 
 #kubectl proxy --www=/Users/mjb/src/git/brendandburns.gcp-live-k8s-visualizer --www-prefix=/my-mountpoint/ --api-prefix=/api/
 
