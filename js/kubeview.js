@@ -14,6 +14,20 @@ let ids_seen_name = [];
 let configHash="";
 let force_redraw=false;
 
+//import 'js/icon_mappings.js';
+
+var icon_mappings={
+    //'redis': 'images/icons/redis.svg'
+    'redis':    'redis.svg', 'redis-commander': 'redis-commander.svg',
+    'flask':    'flask.svg',
+    'angular':  'angular.svg',
+    'react':    'react.svg',
+    'nginx':    'nginx.svg',
+    'guestbook': 'guestbook.svg',
+};
+
+
+
 let handlerList = [];
 
 let getversion=true; /* Once only */
@@ -96,13 +110,14 @@ let deployments_path=undefined;
 let replicasets_path=undefined;
 let pods_path=undefined;
 
-const connectionOverlays = [
-    // to complete
-];
 
 //-- Function definitions: ----------------------------------------------------
 
 const capitalize1stChar = (word) => { let tmp=word; return tmp.replace(/^\w/, c => c.toUpperCase()); };
+
+// async function mysleep(ms) { await sleep(ms); }
+
+// function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 const die = (msg) => {
     if (stayingAlive) {
@@ -111,6 +126,10 @@ const die = (msg) => {
         console.log("die: " + msg);
         throw "";
     }
+
+    console.log("To restart enter in console: 'pause_visu.state=false;'");
+    pause_visu.state=true;
+    //mysleep(10000);
 };
 
 const setPaths = (namespace) => {
@@ -124,7 +143,7 @@ const setPaths = (namespace) => {
 
 
 const createElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
-    return startElemDiv(classes, object, text, x, y, tooltip, fg, bg) + " </div>";
+    return startElemDiv(classes, object, text, x, y, tooltip, fg, bg) + " </div> " + `<!-- createElemDiv ${classes} -->`;
 };
 
 const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
@@ -140,6 +159,7 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
             type_info="Node: ";
         } else if (type == "service") {
             type_info="Service: ";
+            //type_info='';
             //console.log(`SERVICE TEXT ${text}`)
         } else if (type == "deployment") {
             type_info="Deploy: ";
@@ -167,7 +187,7 @@ ${tooltip}`;
     if (bg != undefined) { color_style+="background-color: " + bg + ";"; }
 
     //debug_color(`fg: ${fg} bg:${bg}`);
-    itemSeenIdx = indexOfUIDInList(ids_seen, uid);
+    itemSeenIdx = indexOfUIDInList(ids_seen, uid, 'checking ids_seen', true);
     if (itemSeenIdx != -1) {
         die(`${type}: id <${uid}> name <${name}> already seen (with type ${ids_seen_type[itemSeenIdx]}, name ${ids_seen_name[itemSeenIdx]})`);
     }
@@ -187,9 +207,10 @@ ${tooltip}`;
     } else {
         stElemDiv=`<div id="${uid}" class="${classes}" ${datatip} style="${color_style}" > ${type_info}${text}`;
     }
+    stElemDiv=`<div id="${uid}" class="${classes}" ${datatip} style="${color_style}" > ${type_info}${text}`;
 
     if (type == "node") {
-        debug_node(stElemDiv+" </div>");
+        debug_node(stElemDiv+" </div>"); // Why </div> ????
     } else if (type == "service") {
         debug_svc(stElemDiv+" </div>");
         //console.log(stElemDiv+' </div>');
@@ -431,6 +452,9 @@ const getMasterIndex = (nodes) => {
             master=nodes[index];
             //console.log("MASTER ROLE FOUND" + index);
             debug_log("MASTER=" + index);
+
+            // Note: This will not return from forEach (try 'same' for that):
+            //       but important is that these variables are set
             return [masterIdx, master.metadata.name];
         }
         /* if (node.metadata.name == "docker-for-desktop") {
@@ -458,6 +482,7 @@ const getMasterIndex = (nodes) => {
 const getNodeIndex = (nodes, nodeName) => {
     var nodeIndex = -1;
 
+    //nodes.forEach( (node, index) => { console.log("INDEX=" + index); });
     nodes.forEach( (node, index) => {
         if (node.metadata.name == nodeName) {
             //debug_log(`${node.metadata.name} == ${nodeName}`);
@@ -468,6 +493,7 @@ const getNodeIndex = (nodes, nodeName) => {
 
     //debug_log(nodeIndex);
     if (nodeIndex != -1) {
+	//console.log("RETURN INDEX=" + nodeIndex);
         return nodeIndex;
     }
 
@@ -475,7 +501,7 @@ const getNodeIndex = (nodes, nodeName) => {
     return -1;
 };
 
-const createDeploymentDiv = (object) => {
+const createDeploymentDiv = (object, embed) => {
     let replicas=`${object.status.readyReplicas}/${object.spec.replicas}`;
     let replicasForModal=`${object.status.readyReplicas} present/${object.spec.replicas} desired`;
 
@@ -490,9 +516,27 @@ const createDeploymentDiv = (object) => {
 
     const objectDiv = createElemDiv("deployment col", object, objectText, x, y, tooltip);
     //return objectDiv;
-    const content=` <br/> <b>Replicas</b>: ${replicasForModal} `;
+    const content=` <br/> <b>Replicas</b>: ${replicasForModal} ` + embed;
+
     const modalDiv = createModalText("Deployment", object, objectDiv, object.metadata.uid, content);
     return modalDiv;
+};
+
+const getIconImgTag = (object) => {
+    let run = '';
+    if (object.metadata.labels.run) { run = object.metadata.labels.run; }
+    else if (object.metadata.labels.app) { run = object.metadata.labels.app; }
+    
+    //console.log('run='+run)
+
+    if (!icon_mappings[run]) {
+        //console.log('NO RUN LABEL for ' + object.metadata.name);
+        return '';
+    };
+
+    const iconImgTag='<img width="30" src="images/icons/' + icon_mappings[run] + '" />';
+    //console.log(iconImgTag)
+    return iconImgTag
 };
 
 /*
@@ -519,7 +563,7 @@ inspect(body):
   status: { loadBalancer: { ingress: [ { ip: '137.117.192.44' } ] } } }
 */
 
-const createServiceDiv = (object) => {
+const createServiceDiv = (object, embed) => {
     // spec: { ports: [ { protocol: 'TCP', port: 5000, targetPort: 5000, nodePort: 31896 } ],
     ports_info="PORTS: ";
     node_port=undefined;
@@ -549,10 +593,18 @@ const createServiceDiv = (object) => {
 
     const content="";
     const objectDiv = "<div>" +
-        createElemDiv("service", object, objectText, x, y, tooltip);
+        createElemDiv("service", object, getIconImgTag(object) + objectText + '<hr/>' + embed, x, y, tooltip);
     modalDiv = createModalText("Service", object, objectDiv, objectText, content);
 
     return modalDiv;
+};
+
+const show_pods_seen = (label)    => { if (label === undefined) label = ""; if (label != "") label=`[${label}]`; showSeen(`pod${label}`,    pods_seen); };
+const show_deploys_seen = (label) => { if (label === undefined) label = ""; if (label != "") label=`[${label}]`; showSeen(`deploy${label}`, deploys_seen); };
+const show_rs_seen = (label)      => { if (label === undefined) label = ""; if (label != "") label=`[${label}]`; showSeen(`rs${label}`,     rs_seen); };
+
+const showSeen = (object_type, seen_hash) => {
+    console.log(`${object_type}s_seen[${seen_hash.length}]=${seen_hash}`);
 };
 
 const createReplicaSetDiv = (object) => {
@@ -796,20 +848,53 @@ const createPodDiv = (object, nodeIndex) => {
     return modalDiv;
 };
 
-const indexOfUIDInList = (idlist, id) => {
+const BAD_indexOfUIDInList = (idlist, id, msg) => {
     var foundIdx=-1;
 
+    /*
+     * THIS DOES NOT WORK, we return from innner function call, it doesn't break out of forEach.
+     * There is no break functonality on forEach, you need to use for loop:
+     * See: https://stackoverflow.com/questions/2641347/short-circuit-array-foreach-like-calling-break
+     */
     idlist.forEach( (item_id, index) => {
-        if (item_id == id) { foundIdx = index; return; }
+        if (item_id == id) {
+            return index; // BAD !!
+	}
     });
-    return (foundIdx);
+    return -1;
+};
+
+const indexOfUIDInList = (idlist, id, msg, debug) => {
+    var foundIdx=-1;
+    if (msg === undefined) msg='';
+    if (debug === undefined) debug=false;
+
+	debug=false;
+
+    if (debug) console.log(`indexOfUIDInList(list[${idlist.length}], ${id}, "${msg}"`);
+
+    let index=0;
+    let matchIndex=-1;
+    idlist.some( item_id => {
+        if (debug) console.log(`seen ${item_id}`);
+        if (item_id == id) {
+            if (debug) console.log(`matched ${id}`);
+            matchIndex=index;
+            return true;
+	}
+        index=index+1;
+    });
+
+    if (matchIndex == -1)
+        if (debug) console.log(`failed to match ${id}`);
+    return matchIndex;
 };
 
 const createCheckBoxText = (id, value, label, checkState) => {
     let checked="";
     if (checkState) { checked="checked='checked'"; }
 
-    let checkBoxDivText=`<div class="col"><input type="checkbox" id="${id}" name="${id}"${checked} value="${value}" /> <label for="${value}">${label}</label></div>`;
+    let checkBoxDivText=`<div class="col"><input type="checkbox" id="${id}" name="${id}"${checked} value="${value}" /> <label for="${value}">${label}</label></div> <!-- createCheckBoxText -->`;
     /*let showKubeCompButtonText='<div class="col">' +
         '<input type="checkbox" id="show_kubernetes" name="show_kubernetes" ' + checked + ' value="show_all" />' +
         '<label for="show_all">Show Kubernetes components</label>' +
@@ -821,7 +906,7 @@ const createCheckBoxText = (id, value, label, checkState) => {
 const createButtonText = (id, value, label) => {
 
     //let buttonDivText=`<div class="col"><input type="button" id="${id}" name="${id} value="${value}" /> <label for="${value}">${label}</label></div>`;
-    let buttonDivText=`<div class="col "><button class="request_button" id="${id}" name="${id}" value="${value}" > ${label} </button> </div>`;
+    let buttonDivText=`<div class="col "><button class="request_button" id="${id}" name="${id}" value="${value}" > ${label} </button> </div> <!-- createButtonText -->`;
 
     return buttonDivText;
 };
@@ -854,6 +939,10 @@ const addButtonHandler = (id, label, handler) => {
     });
 };
 
+const sanitizeName = (name) => {
+    return 'b_' + name.replace(/\./g, '_');
+};
+
 const createModalText = (type, object, href_content, id, markup) => {
 
     // const labelsAnnotations = getHTMLLabelsAnnotations(object);
@@ -878,11 +967,13 @@ const createModalText = (type, object, href_content, id, markup) => {
            <a href="${object.metadata.selfLink}"> ${object.metadata.selfLink}
            </a>`;
 
-        var divid_del_button=object.metadata.name + "_buttonDELETE";
-        var divid_del_output=object.metadata.name + "_buttonDELETE_OP";
+        name = sanitizeName( object.metadata.name ); // In case name is in form of ip address, need html compatible div id
+
+        const divid_del_button=name + "_buttonDELETE";
+        const divid_del_output=name + "_buttonDELETE_OP";
 
         deleteBUTTON=createButtonText(divid_del_button, "DELETE", "DELETE");
-        deleteOUTPUT=`<div id="${divid_del_output}" class="request_output scroll_auto" > </div>`;
+        deleteOUTPUT=`<div id="${divid_del_output}" class="request_output scroll_auto" > </div> <!-- deleteOP -->`;
         handlerList.push( [ divid_del_button, divid_del_output, (id, label, divid_op) => {
             let def = $.Deferred();
             var hash_divid_output = "#" + divid_op;
@@ -937,7 +1028,6 @@ const createModalText = (type, object, href_content, id, markup) => {
 	object.status.addresses.forEach( (address, index) => {
             //typeSpecific += `<li> ${address.type}: ${address.address} </li>`;
             typeSpecific += `<br/> <b> ${address.type}</b>: ${address.address} </li>`;
-
 	});
         //typeSpecific += '</ul>';
     };
@@ -950,13 +1040,15 @@ const createModalText = (type, object, href_content, id, markup) => {
         const path = `/api/v1/namespaces/${namespace}/services/${object.metadata.name}/proxy/`;
         const href = `${rootURL}${path}`;
 
-        const divid_button=object.metadata.name + "_buttonGET";
-        const divid_output=object.metadata.name + "_buttonGET_OP";
+        name = sanitizeName( object.metadata.name ); // In case name is in form of ip address, need html compatible div id
+
+        const divid_button=name + "_buttonGET";
+        const divid_output=name + "_buttonGET_OP";
 
 
         getBUTTON=createButtonText(divid_button, "GET", "GET");
-        getOUTPUT=`<div id="${divid_output}" class="request_output scroll_auto" > </div>`;
-        console.log(`Pushing handler for ${divid_button}//${divid_output}`);
+        getOUTPUT=`<div id="${divid_output}" class="request_output scroll_auto" > </div> <!-- getOP -->`;
+        //console.log(`Pushing handler for ${divid_button}//${divid_output}`);
 
         handlerList.push( [ divid_button, divid_output, (id, label, divid_op) => {
 
@@ -1018,7 +1110,7 @@ const createModalText = (type, object, href_content, id, markup) => {
 	${content}
         <div class="scroll_auto"> ${inspectText} </div>
       </div>
-      </div>
+    </div>
     `;
 
     return modalText;
@@ -1089,9 +1181,12 @@ const redrawTopMenu = () => {
 
     let showKubeCompButtonText = createCheckBoxText( "show_kubernetes", "show_all", "Show Kubernetes components", show_kube_components.state);
 
-    let toplineMenu=`<div><div class="row" ><b>Cluster Name:</b> <i>${CLUSTERNAME}</i>, <b>Kubernetes:</b><i>${kube_version}</i>, <b>Namespace:</b> </div> <div class="col" > ${nsMenu} </div></div>
-    ${runningButtonText} ${tooltipButtonText} ${showKubeCompButtonText}
-    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${sourceURL}`;
+    if (CLUSTERNAME == null) { CLUSTERNAME='CLUSTERNAME_UNDEFINED'; }
+    let toplineMenu=`
+	 <div><div class="row" ><b>Cluster Name:</b> <i>${CLUSTERNAME}</i>, <b>Kubernetes:</b><i>${kube_version}</i>, <b>Namespace:</b> </div> <div class="col" > ${nsMenu} </div></div>
+         ${runningButtonText} ${tooltipButtonText} ${showKubeCompButtonText}
+         &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${sourceURL}
+    `;
 
     $("#top_menu").empty();
     $("#top_menu").append(toplineMenu);
@@ -1111,64 +1206,24 @@ const redrawTopMenu = () => {
 
 };
 
-const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
-
-    //redrawTopMenu();
-
-    var nodeDivText=[];
-
-    // Determine which is the (only) Master node:
-    const retList = getMasterIndex(nodes);
-    let masterIdx = retList[0];
-    let masterNode = retList[1];
-
-    //console.log(`masterIdx: ${masterIdx}`);
-    //if (!masterIdx) { console.log(`NOT masterIdx: ${masterIdx}`); };
-    //if (masterIdx == undefined) { console.log(`UNDEF masterIdx: ${masterIdx}`); };
-
-    if (masterIdx == undefined) {
-        // Create a pseudo-master to display services, replicas:
-        masterIdx=0;
-	//die("WHY?");
-
-        masterNode={
-            "metadata": {
-                "pseudo": "True",
-                "uid": "pseudo-master(s)",
-                "name": "pseudo-master(s) [Managed Cluster]",
-                "labels": {
-                    "node-role.kubernetes.io/master": "",
-                 },
-            },
-            "status": {
-                "conditions": [ { "Ready": "True" } ],
-            },
-            "spec": {
-                "taints": [ ],
-            },
-        };
-        nodes.unshift(masterNode);
-    }
-    debug_node(`MASTER=node[${masterIdx}]=${masterNode}'`);
-
-    nodes.forEach( (node, index)      => {
+const createNode = (node, index, masterIdx, embed_text) => {
         //let y=1000*index;
         let y=0;
         let x=0; //100*index;
 
-        nodeDivText[index]="";
+        let nodeDivText="";
 
         const name = node.metadata.name;
         let nameText = name;
         role = "worker";
 
         if (index == masterIdx) {
-            nameText = "<b>*<u>" + node.metadata.name + "</u>*</b>";
+            nameText = "<b>*<u>" + name + "</u>*</b>";
             role = "master";
         }
 
         tooltip="";
-        nodeDivText[index]+="<i>" + nameText + "</i>";
+        nodeDivText+="<i>" + nameText + "</i>";
 
         classes="node";
         var ready=true;
@@ -1219,65 +1274,275 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
         const content="";
         const object=node;
 
-        stElemDiv = startElemDiv(classes, node, nodeDivText[index], x, y, tooltip);
-        nodeDivText[index] = stElemDiv;
-        //console.log(`node[${index}]: ${stElemDiv}`)
-        //if (index != masterIdx) {
+	//console.log(nodeDivText);
+	//if (tooltip === undefined) tooltip='';
+        nodeDivText = startElemDiv(classes, node, nodeDivText, x, y, tooltip);
+	//console.log(nodeDivText);
 	/* TODO: REMOVE THIS HACK - learn to do CSS layouts properly! */
-        nodeDivText[index] += "<p style=\"padding: 0px; margin: 5px;\" />";
+        nodeDivText += "<p style=\"padding: 0px; margin: 5px;\" />";
+        //nodeDivText += '<hr/>';
         //}
 
         // Used for correct pod placement on a row:
         node.lastPodImage=undefined;
-    });
+        //nodeDivText += '<hr/>';
 
+	//console.log(nodeDivText);
+        return nodeDivText + embed_text + '</div> <!-- node -->';
+};
+
+
+const createReplicaset = (deployment, replicaset, nodeIdx, masterIdx) => {
+    let rpsetDiv='';
+
+    if (show_kube_components.state || (replicaset.metadata.name != "kubernetes")) {
+
+	/* WHY OWNERS ??? => to pickup matching replicasets: */
+        owners = replicaset.metadata.ownerReferences;
+        owners.forEach( (owner) => {
+            if (deployment.metadata.name == owner.name) {
+		//console.log("Found owner");
+		//console.log(owner);
+                //depDiv += '<div class="col">';
+                replicasets_seen.push( replicaset.metadata.uid );
+                rpsetDiv += "<br/><br/>" + createReplicaSetDiv(replicaset);
+                debug_svc(`${replicaset.metadata.name}: [${replicaset.spec.replicas}] ${deployment.metadata.name} == ${owner.name}`);
+
+		let podsDiv='';
+		pods.forEach( (pod, index) => {
+                    //if (pod.metadata.labels && pod.metadata.labels.run && replicaset.metadata.labels && replicaset.metadata.labels.run) {
+		        //console.log(`${pod.metadata.labels.run} ?? == ?? ${replicaset.metadata.labels.run}`);
+		    //}
+                    //console.log("#pods in list: " + pods_seen.length);
+                    itemSeenIdx = indexOfUIDInList(pods_seen, pod.metadata.uid);
+
+                    if (itemSeenIdx == -1) {
+                      if (pod.metadata.labels && pod.metadata.labels.run && replicaset.metadata.labels && replicaset.metadata.labels.run && (pod.metadata.labels.run == replicaset.metadata.labels.run)) {
+                        nodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
+			//console.log(`pod nodeIndex=${nodeIndex}, current nodeIdx=${nodeIdx}`);
+                        if (nodeIndex == nodeIdx) {
+                            pods_seen.push( pod.metadata.uid );
+                            podsDiv += createPodDiv(pod, nodeIndex);
+		        };
+		    };
+		    };
+		});
+                rpsetDiv += podsDiv // + '</div> <!-- replicaSet -->';
+                rpsetDiv + '</div> <!-- replicaSet -->';
+            }
+        });
+    }
+    return rpsetDiv;
+};
+
+const createDeployment = (service, deployment, nodeIdx, masterIdx) => {
+
+    let depDiv='';
+
+    if (show_kube_components.state || (deployment.metadata.name != "kubernetes")) {
+        itemSeenIdx = indexOfUIDInList(deploys_seen, deployment.metadata.uid, 'createDeployment: searching', true);
+        if (itemSeenIdx == -1) {
+	    // Service or No service:
+	    treat_deploys=false;
+            if (service == null) { treat_deploys=true; }
+	    if (service && deployment && (deployment.metadata) && (service.metadata.name == deployment.metadata.name)) { treat_deploys=true; }
+
+            if (treat_deploys) {
+                //depDiv += '<div class="col">';
+                deploys_seen.push( deployment.metadata.uid );
+                depDiv += createDeploymentDiv(deployment);
+                //depDiv += '</div> <!-- deploymnt -->';
+
+                // replicaset.metadata.ownerReferences.name: flask-app (Deployment)
+                replicasets.forEach( (replicaset, index) => {
+		    //devDiv += createReplicaset(service, deployment, nodeIdx, masterIdx) => {}
+		    depDiv += createReplicaset(deployment, replicaset,nodeIdx, masterIdx);
+	        });
+            };
+        };
+    }
+
+    return depDiv;
+};
+
+const createServiceLess = (nodeIdx, masterIdx) => {
+    let y=0;
+    let x=10;
+
+    let noSvcDiv = '';
+    let deploymentDivs = '';
+
+    deployments.forEach( (deployment, index) => {
+        deploymentDivs += createDeployment(null, deployment, nodeIdx, masterIdx);
+    });
+    noSvcDiv += '<div> ' + deploymentDivs + '</div> <!-- deploymnt -->' + "<br/>";
+
+    return noSvcDiv;
+}
+
+const createService = (service, nodeIdx, masterIdx) => {
+    let y=0;
+    let x=10;
+
+    let svcDiv = '';
+
+    service.x = x; service.y = y;
+
+    if (show_kube_components.state || (service.metadata.name != "kubernetes")) {
+        let deploymentDivs = '';
+
+        deployments.forEach( (deployment, index) => {
+            //deploymentDivs += createDeployment(service, deployment, nodeIdx, masterIdx);
+            deploymentDivs += createDeployment(service, deployment, nodeIdx, masterIdx);
+        });
+        //console.log(deploymentDivs);
+        svcDiv += createServiceDiv(service, deploymentDivs);
+
+     };
+
+     //svcDiv += "<br/>";
+     debug_svc(`services_info='${services_info}'`);
+     debug_svc(`service[${nodeIdx}]: ${service.metadata.name}`);
+
+     return svcDiv;
+}
+
+const get_run_app_label = (item) => {
+    if (item.metadata.labels && item.metadata.labels.run) {
+        return item.metadata.labels.run;
+    }
+    if (item.metadata.labels && item.metadata.labels.app) {
+        return item.metadata.labels.app;
+    }
+    return '';
+};
+
+// START PAGE:
+const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, services) => {
+
+    //redrawTopMenu();
+
+    var nodeDivText=[];
+
+    // Determine which is the (only) Master node:
+    const retList = getMasterIndex(nodes);
+    let masterIdx = retList[0];
+    let masterNode = retList[1];
+
+    //console.log(`masterIdx: ${masterIdx}`);
+    //if (!masterIdx) { console.log(`NOT masterIdx: ${masterIdx}`); };
+    //if (masterIdx == undefined) { console.log(`UNDEF masterIdx: ${masterIdx}`); };
+
+    if (masterIdx == undefined) {
+        // Create a pseudo-master to display services, replicas:
+        masterIdx=0;
+	//die("WHY?");
+
+        masterNode={
+            "metadata": {
+                "pseudo": "True",
+                "uid": "pseudo-master(s)",
+                "name": "pseudo-master(s) [Managed Cluster]",
+                "labels": {
+                    "node-role.kubernetes.io/master": "",
+                 },
+            },
+            "status": {
+                "conditions": [ { "Ready": "True" } ],
+            },
+            "spec": {
+                "taints": [ ],
+            },
+        };
+        nodes.unshift(masterNode);
+    }
+    debug_node(`MASTER=node[${masterIdx}]=${masterNode}'`);
+
+    pods_seen=[];
     deploys_seen=[];
     replicasets_seen=[];
 
-    services_info="";
-    services.forEach( (service, index) => {
-        let y=0;
-        let x=10;
+    embed_service_text=[];
+    nodes.forEach( (node, nodeIndex)      => {
 
-        service.x = x; service.y = y;
-        if (show_kube_components.state || (service.metadata.name != "kubernetes")) {
-            svcDiv = createServiceDiv(service);
-            deployments.forEach( (deployment, index) => {
-                if (show_kube_components.state || (deployment.metadata.name != "kubernetes")) {
-                    if (service.metadata.name == deployment.metadata.name) {
-                        //svcDiv += '<div class="col">';
-                        deploys_seen.push( deployment.metadata.uid );
-                        svcDiv += createDeploymentDiv(deployment);
-                        //svcDiv += '</div>';
+        embed_text=''
 
-                        // replicaset.metadata.ownerReferences.name: flask-app (Deployment)
-                        replicasets.forEach( (replicaset, index) => {
-                            if (show_kube_components.state || (replicaset.metadata.name != "kubernetes")) {
-                                owners = replicaset.metadata.ownerReferences;
-                                owners.forEach( (owner) => {
-                                    if (deployment.metadata.name == owner.name) {
-                                        //svcDiv += '<div class="col">';
-                                        replicasets_seen.push( replicaset.metadata.uid );
-                                        svcDiv += createReplicaSetDiv(replicaset);
-                                        debug_svc(`${replicaset.metadata.name}: [${replicaset.spec.replicas}] ${deployment.metadata.name} == ${owner.name}`);
-                                    }
-                               });
-                         }
-                      });
-                   }
-                }
-            });
+        if (nodeIndex == masterIdx) {
+            services_info="";
+            services.forEach( (service, index) => {
+		//console.log("Adding service on master");
+                let svcDiv = createService(service, nodeIndex, masterIdx);
+                services_info+=svcDiv;
+             } );
+             embed_text+=services_info;
 
-            svcDiv += "</div>";
-            svcDiv += "<br/>";
-            services_info+=svcDiv;
-            debug_svc(`services_info='${services_info}'`);
-            debug_svc(`service[${index}]: ${service.metadata.name}`);
-        }
+         } else {
+		 // NOOP:
+             embed_text='';
+         }
+
+         run_labels=[];
+
+         let itemSeenIdx;
+
+         pods.forEach( (pod, podIndex)      => {
+             run_label = get_run_app_label(pod)
+             itemSeenIdx = indexOfUIDInList(run_labels, run_label);
+             if ( itemSeenIdx == -1) { run_labels.push(run_label); }
+	 });
+
+	 console.log(run_labels);
+
+         podsDiv='';
+         //run_labels.forEach( (run_label, podIndex)      => {
+         for( run_label_idx in run_labels ) {
+             run_label = run_labels[run_label_idx];
+             console.log('r_l='+run_label);
+             pods.forEach( (pod, podIndex)      => {
+                 itemSeenIdx = indexOfUIDInList(pods_seen, pod.metadata.uid);
+                 if (itemSeenIdx == -1) {
+                     pod_run_label = get_run_app_label(pod)
+
+                     if (run_label == pod_run_label) {
+                         podNodeIndex = getNodeIndex(nodes, pod.spec.nodeName);
+			//console.log(`pod nodeIndex=${nodeIndex}, current nodeIdx=${nodeIdx}`);
+                         if (podNodeIndex == nodeIndex) {
+                             pods_seen.push( pod.metadata.uid );
+                             podsDiv += createPodDiv(pod, nodeIndex);
+		         };
+		     };
+		 };
+             });;
+	 };
+	 //}
+         //embed_service_text[nodeIndex] += 'crud';
+
+         embed_text += podsDiv;
+         embed_service_text.push( embed_text );
      } );
-     nodeDivText[masterIdx]+=services_info;
 
-     deploys_info="";
+    //console.log( embed_service_text.length );
+    //nodes.forEach( (node, nodeIndex)      => {
+        //console.log( embed_service_text[nodeIndex] )
+    //});
+
+    nodes.forEach( (node, nodeIndex)      => {
+        //console.log(embed_service_text[nodeIndex]);
+        nodeDivText[nodeIndex] = createNode(node, nodeIndex, masterIdx, embed_service_text[nodeIndex]);
+	    //console.log( "----" + nodeDivText[nodeIndex]  + "----")
+    });
+
+
+    
+    show_deploys_seen('Service');
+
+    nodes.forEach( (node, nodeIndex)      => {
+         let noSvcDiv = createServiceLess(nodeIndex, masterIdx);
+         nodeDivText[nodeIndex]+=noSvcDiv;
+    });
+    show_deploys_seen('ServiceLess');
+    //console.log("#deploys_seen(ServiceLess)=" + deploys_seen.length);
+    /*deploys_info="";
      deployments.forEach( (deployment, index) => {
          // let y=100+100*index;
          //let x=110; //100*index;
@@ -1290,14 +1555,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          if (itemSeenIdx == -1) {
              if (show_kube_components.state || (deployment.metadata.name != "kubernetes")) {
-                 services.forEach( service => {
-                     if (service.metadata.name == deployment.metadata.name) {
-                         //x = service.x + 180; deployment.x = x;
-                         //y = service.y + 50;  deployment.y = y;
-                         //!! no break;
-                     }
-                 });
-                 deploys_info+=createDeploymentDiv(deployment);
+                 //deploys_info+=createDeploymentDiv(deployment);
              }
          }
         // debug_dep(`deployment[${index}]: ${deployment.metadata.name}`);
@@ -1332,11 +1590,13 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 
          nodeDivText[nodeIndex] += podDiv;
      });
+     */
 
      let ALL_info ="";
      nodes.forEach( (node, index)      => {
-         objectDiv = nodeDivText[index] + " </div>";
+         objectDiv = nodeDivText[index] + " </div> <!-- node -->";
          const content="";
+         //console.log(`**node[${index}]: ::${objectDiv}::**`);
          //console.log(`**node[${index}]: ${objectDiv}**`)
          //console.log(`**node[${index}]**`);
          const modalDiv = createModalText("Node", node, objectDiv, `NODE_${index}`, content);
@@ -1401,7 +1661,7 @@ const redrawAll = (info) => {
         var divid=handler_info[0];
         var divid_op=handler_info[1];
         var handler=handler_info[2];
-        console.log(`Adding handler for ${divid}//${divid_op} + handler`);
+        //console.log(`Adding handler for ${divid}//${divid_op} + handler`);
         addButtonHandler( divid, "GET", (id, label, divid_op) => { handler(id, label, divid_op); } );
     });
 
