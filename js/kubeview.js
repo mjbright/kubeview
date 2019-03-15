@@ -1490,7 +1490,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
              if ( itemSeenIdx == -1) { run_labels.push(run_label); }
 	 });
 
-	 console.log(run_labels);
+	 //console.log(run_labels);
 
          depsDiv='';
          podsDiv='';
@@ -1498,7 +1498,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          for( run_label_idx in run_labels ) {
              run_label_div='';
              run_label = run_labels[run_label_idx];
-             console.log('r_l='+run_label);
+             //console.log('r_l='+run_label);
 
              if (nodeIndex == masterIdx) {
                  deployments.forEach( (deploy, deployIndex)      => {
@@ -1562,13 +1562,14 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
 	    //console.log( "----" + nodeDivText[nodeIndex]  + "----")
     });
 
+	/*
     show_deploys_seen('Service');
-
     nodes.forEach( (node, nodeIndex)      => {
          let noSvcDiv = createServiceLess(nodeIndex, masterIdx);
          nodeDivText[nodeIndex]+=noSvcDiv;
     });
     show_deploys_seen('ServiceLess');
+    */
     //console.log("#deploys_seen(ServiceLess)=" + deploys_seen.length);
 
      let ALL_info ="";
