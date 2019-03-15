@@ -807,9 +807,15 @@ const createPodDiv = (object, nodeIndex) => {
     const image=object.spec.containers[0].image;
     const image_version=getImageVersion(object);
 
-    if (object.metadata.labels && object.metadata.labels.run) {
+    run_label = get_run_app_label(object);
+    if (run_label != '') {
+        // Get end of podId - the unique part ...
         let postfix=objectText.substr(objectText.lastIndexOf("-"));
-	objectText=`${object.metadata.labels.run}${image_version}-*${postfix}`;
+        if (image_version != '') {
+	    objectText=`${run_label}:${image_version}-*${postfix}`;
+	} else {
+	    objectText=`${run_label}-*${postfix}`;
+	}
     }
 
     let tooltip="";
