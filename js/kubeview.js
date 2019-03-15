@@ -806,15 +806,19 @@ const createPodDiv = (object, nodeIndex) => {
     let objectText=`${object.metadata.name}`;
     const image=object.spec.containers[0].image;
     const image_version=getImageVersion(object);
+    const num_containers=object.spec.containers.length;
 
     run_label = get_run_app_label(object);
     if (run_label != '') {
+        let more_containers='';
+        if (num_containers > 1) { more_containers=`<b>[${num_containers}]</b> `; }
+
         // Get end of podId - the unique part ...
         let postfix=objectText.substr(objectText.lastIndexOf("-"));
         if (image_version != '') {
-	    objectText=`${run_label}:${image_version}-*${postfix}`;
+	    objectText=`${more_containers}${run_label}:${image_version}-*${postfix}`;
 	} else {
-	    objectText=`${run_label}-*${postfix}`;
+	    objectText=`${more_containers}${run_label}-*${postfix}`;
 	}
     }
 
