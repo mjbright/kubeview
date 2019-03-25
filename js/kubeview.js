@@ -129,7 +129,8 @@ const die = (msg) => {
     }
 
     console.log("To restart enter in console: 'pause_visu.state=false;'");
-    pause_visu.state=true;
+	//TODO: reenable
+    // pause_visu.state=true;
     //mysleep(10000);
 };
 
