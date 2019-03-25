@@ -27,6 +27,7 @@ SERVE_PORT=9001
 
 while [ ! -z "$1" ];do
     case $1 in
+        -p)  shift; SERVE_PORT=$1;;
         -r)   # Access remotely:
             SERVE_IFACE=$(ip a | awk '!/[0-9]: lo/ && /^[0-9]: / { FS=":"; $0=$2; print $1; exit 0; }')
             ;;
