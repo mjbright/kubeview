@@ -166,8 +166,8 @@ const startElemDiv = (classes, object, text, x, y, tooltip, fg, bg) => {
         } else if (type == "deployment") {
             type_info="Deploy: ";
         } else if (type == "replicaset") {
-            //type_info="RS: ";
-            type_info="";
+            type_info="RS: ";
+            //type_info="";
         } else if (type == "pod") {
             type_info="";
         } else {
@@ -1522,7 +1522,8 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                          replicaset_run_label = get_run_app_label(replicaset)
                          if (run_label == replicaset_run_label) {
                              replicasets_seen.push( replicaset.metadata.uid );
-                             run_label_div += createDeploymentDiv(replicaset, nodeIndex);
+                             //run_label_div += createXXXXDeploymentDiv(replicaset, nodeIndex);
+                             run_label_div += createReplicaSetDiv(replicaset);
 		         };
                      }
                  });
