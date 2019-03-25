@@ -65,8 +65,8 @@ DASHBOARD_HTML=$RUN_DIR/${HOST}_p${PORT}.dashboard.html
 # Take into account ssh tunneling:
 [ -z "$VISU_PORT" ] && VISU_PORT=$PORT
 
-VISUURL=http://127.0.0.1:$VISU_PORT/static/$HOST.html
-TTYDURL=http://127.0.0.1:$TTYDPORT
+VISU_URL=http://127.0.0.1:$VISU_PORT/static/$HOST.html
+TTYD_URL=http://127.0.0.1:$TTYDPORT
 
 modify_template() {
     HTML=$1; shift;
@@ -76,8 +76,8 @@ modify_template() {
         -e "s_data-tip='TOOLTIP'_data-tip='$TOOLTIP'_" \
         -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
         -e "s_CLUSTERNAME='CLUSTERNAME'_CLUSTERNAME='$CLUSTER'_" \
-        -e "s_TTYDURL_${TTYDURL}_" \
-        -e "s_VISUURL_${VISUURL}_" \
+        -e "s_TTYDURL_${TTYD_URL}_" \
+        -e "s_VISUURL_${VISU_URL}_" \
             $TEMPLATE > $HTML; }
 
     ls -al $HTML
@@ -113,8 +113,12 @@ add_source_tooltip() {
 
 add_source_tooltip
 echo SOURCEURL=$SOURCEURL
-echo VISUURL=$VISUURL
-echo TTYDURL=$TTYDURL
+echo VISU_URL=$VISU_URL
+echo TTYD_URL=$TTYD_URL
+
+DASHBOARD_URL=${VISU_URL%/*}/${DASHBOARD_HTML##*/}
+echo DASHBOARD_URL=$DASHBOARD_URL
+#DASHBOARD_HTML=$RUN_DIR/${HOST}_p${PORT}.dashboard.html
 
 
 cd $RUN_DIR/
