@@ -812,7 +812,7 @@ const createPodDiv = (object, nodeIndex) => {
     run_label = get_run_app_label(object);
     if (run_label != '') {
         let more_containers='';
-        if (num_containers > 1) { more_containers=`<b>[${num_containers}]</b> `; }
+        // if (num_containers > 1) { more_containers=`<b>[${num_containers}]</b> `; }
 
         // Get end of podId - the unique part ...
         let postfix=objectText.substr(objectText.lastIndexOf("-"));
@@ -853,12 +853,30 @@ const createPodDiv = (object, nodeIndex) => {
         nodes[nodeIndex].lastPodImage=image;
     }
 
-    const objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
-    const content="";
-    const modalDiv = createModalText("Pod", object, objectDiv, objectText, content);
+    containerBlocksHTML='';
+    //object.spec.containers.forEach( (item_id, index) => {}
+    object.status.containerStatuses.forEach( (item_id, index) => {
+        img='images/icons/yellow_square.svg';
+        if (item_id.ready == true) {
+            img='images/icons/green_square.svg';
+	}
+	    /*
+        if (item_id.state == "Running") {
+            img='images/icons/green_square.svg';
+	} else if (item_id.state == "Error") {
+            img='images/icons/red_square.svg';
+	} else {
+            console.log(`container state=${item_id.state}`);
+            console.log(object);
+            img='images/icons/yellow_square.svg';
+        }
+	*/
+        containerBlocksHTML += `<img src="${img}" width="10" height="10" />`;
+    });
 
-    return modalDiv;
-};
+    objectText += containerBlocksHTML;
+    let objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
+    //objectDiv += containerBlocksHTML;
 
 const BAD_indexOfUIDInList = (idlist, id, msg) => {
     var foundIdx=-1;
@@ -1529,6 +1547,8 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                  });
 	     }
 
+             let matchingPods=0;
+             let nodePodsDiv='';
              pods.forEach( (pod, podIndex)      => {
                  itemSeenIdx = indexOfUIDInList(pods_seen, pod.metadata.uid);
                  if (itemSeenIdx == -1) {
