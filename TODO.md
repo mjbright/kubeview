@@ -5,6 +5,11 @@
 - Re-enable modal for Pods (broken since adding container blocks)
 - fix occasional pausing
 - fix difficulty to select dropdown (keeps refreshing)
+- fix layout bugs (bad HRs between RS, bad association of Pods to RS version): see kubeview_layout_bugs.JPG
+
+# Scenario features:
+
+- Use colour for plain text output to show service upgrades
 
 # Boxes (Nodes, Services, Deploys, RS, Pods):
 Title line + smaller lines
