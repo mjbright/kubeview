@@ -1329,6 +1329,8 @@ const createReplicaset = (deployment, replicaset, nodeIdx, masterIdx) => {
                 debug_svc(`${replicaset.metadata.name}: [${replicaset.spec.replicas}] ${deployment.metadata.name} == ${owner.name}`);
 
 		let podsDiv='';
+		//if (pods.length > 1) rpsetDiv += '<hr/>';
+
 		pods.forEach( (pod, index) => {
                     itemSeenIdx = indexOfUIDInList(pods_seen, pod.metadata.uid);
 
@@ -1552,12 +1554,18 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
                      if (podNodeIndex == nodeIndex) {
                          if (run_label == pod_run_label) {
                              pods_seen.push( pod.metadata.uid );
-                             run_label_div += createPodDiv(pod, nodeIndex);
+                             nodePodsDiv += createPodDiv(pod, nodeIndex);
+                             matchingPods+=1;
 		         };
 		     };
 		 };
              });;
-             if (run_label_div != '') {
+
+	     if (matchingPods > 0) {
+		 //if (matchingPods > 1) run_label_div += '<hr/>';
+		 run_label_div += '<hr/>';
+		 run_label_div += nodePodsDiv;
+
                  const object={ "metadata": { "labels": { "run": run_label, }, }, };
                  podsDiv += '<div class="service"> '+ getIconImgTag(object)+ `${run_label_div} </div>`;
                  //podsDiv += '<div class="service"> '+ `${run_label_div} </div>`;

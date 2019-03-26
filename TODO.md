@@ -5,7 +5,7 @@
 - Re-enable modal for Pods (broken since adding container blocks)
 - fix occasional pausing
 - fix difficulty to select dropdown (keeps refreshing)
-- fix layout bugs (bad HRs between RS, bad association of Pods to RS version): see kubeview_layout_bugs.JPG
+- fix layout bugs (pods alongside arbitrary(first) replicaSet, not necessarily correct version)
 
 # Scenario features:
 
