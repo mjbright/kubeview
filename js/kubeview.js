@@ -878,20 +878,13 @@ const createPodDiv = (object, nodeIndex) => {
     let objectDiv = createElemDiv(classes, object, objectText, x, y, tooltip, fg, bg);
     //objectDiv += containerBlocksHTML;
 
-const BAD_indexOfUIDInList = (idlist, id, msg) => {
-    var foundIdx=-1;
+    const content="";
 
-    /*
-     * THIS DOES NOT WORK, we return from innner function call, it doesn't break out of forEach.
-     * There is no break functonality on forEach, you need to use for loop:
-     * See: https://stackoverflow.com/questions/2641347/short-circuit-array-foreach-like-calling-break
-     */
-    idlist.forEach( (item_id, index) => {
-        if (item_id == id) {
-            return index; // BAD !!
-	}
-    });
-    return -1;
+    //TODO: Fix use of modal here (BROKEN by adding in containerBlocksHTML)
+    //const modalDiv = createModalText("Pod", object, objectDiv, objectText, content);
+    const modalDiv =objectDiv;
+
+    return modalDiv;
 };
 
 const indexOfUIDInList = (idlist, id, msg, debug) => {
