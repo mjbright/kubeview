@@ -1,4 +1,11 @@
 
+# Bugs:
+
+- Get OUTPUT div working in modals
+- Re-enable modal for Pods (broken since adding container blocks)
+- fix occasional pausing
+- fix difficulty to select dropdown (keeps refreshing)
+
 # Boxes (Nodes, Services, Deploys, RS, Pods):
 Title line + smaller lines
 
