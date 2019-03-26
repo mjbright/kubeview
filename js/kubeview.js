@@ -209,7 +209,7 @@ ${tooltip}`;
     } else {
         stElemDiv=`<div id="${uid}" class="${classes}" ${datatip} style="${color_style}" > ${type_info}${text}`;
     }
-    stElemDiv=`<div id="${uid}" class="${classes}" ${datatip} style="${color_style}" > ${type_info}${text}`;
+    //stElemDiv=`<div id="${uid}" class="${classes}" ${datatip} style="${color_style}" > ${type_info}${text}`;
 
     if (type == "node") {
         debug_node(stElemDiv+" </div>"); // Why </div> ????
