@@ -14,6 +14,22 @@ let ids_seen_name = [];
 let configHash="";
 let force_redraw=false;
 
+let rootURL="";
+
+const protocol=window.location.protocol;
+const hostname=window.location.hostname;
+const port=window.location.port;
+
+var script_tag = document.getElementById('kubeview')
+var apiurl = script_tag.getAttribute("data-apiurl");
+rootURL=`${protocol}://${hostname}:${port}`;
+	
+if (typeof apiurl != "undefined") {
+    rootURL=apiurl
+}
+
+console.log(`Using rootURL '${rootURL}'`);
+
 //import 'js/icon_mappings.js';
 
 var icon_mappings={
@@ -129,6 +145,7 @@ const die = (msg) => {
     }
 
     console.log("To restart enter in console: 'pause_visu.state=false;'");
+     pause_visu.state=false;
 	//TODO: reenable
     // pause_visu.state=true;
     //mysleep(10000);
@@ -324,6 +341,7 @@ const getClusterState = () => {
     let def = $.Deferred();
 
     debug_TOP(`getClusterState: using namespace ${namespace}`);
+    console.log(`Using rootURL '${rootURL}'`);
     setPaths(namespace);
 
     const firstReq=jQuery.now();
@@ -348,7 +366,7 @@ const getClusterState = () => {
     services = [];
 
     if ( getversion ) {
-        const versionReq = $.getJSON(version_path, (obj) => {
+        const versionReq = $.getJSON(rootURL + version_path, (obj) => {
             kube_version=obj.gitVersion;
 	    console.log(`GOT kube_version[git]=${kube_version}`);
 	});
@@ -356,37 +374,37 @@ const getClusterState = () => {
         getversion=false; /* Once only */
     }
     if ( getnodes ) {
-        const nodesReq = $.getJSON(nodes_path, (obj) => {
+        const nodesReq = $.getJSON(rootURL + nodes_path, (obj) => {
             if (obj.items == undefined) { return; }
             nodes = obj.items; nodes.forEach( (item) => { item.kind="node";} ); });
         requests.push(nodesReq);
     }
     if ( getns ) {
-        const namespacesReq = $.getJSON(namespaces_path, (obj) => {
+        const namespacesReq = $.getJSON(rootURL + namespaces_path, (obj) => {
             if (obj.items == undefined) { return; }
             namespaces=obj.items; namespaces.forEach( (item) => { item.kind="namespace";} ); });
         requests.push(namespacesReq);
     }
     if ( getservices ) {
-        const servicesReq   = $.getJSON(services_path,   (obj) => {
+        const servicesReq   = $.getJSON(rootURL + services_path,   (obj) => {
             if (obj.items == undefined) { return; }
             services=obj.items; services.forEach( (item) => { item.kind="service";} ); });
         requests.push(servicesReq);
     }
     if ( getdeploys ) {
-        const deploymentsReq   = $.getJSON(deployments_path,   (obj) => {
+        const deploymentsReq   = $.getJSON(rootURL + deployments_path,   (obj) => {
             if (obj.items == undefined) { return; }
             deployments=obj.items; deployments.forEach( (item) => { item.kind="deployment";} ); });
         requests.push(deploymentsReq);
     }
     if ( getrs ) {
-        const replicasetsReq   = $.getJSON(replicasets_path,   (obj) => {
+        const replicasetsReq   = $.getJSON(rootURL + replicasets_path,   (obj) => {
             if (obj.items == undefined) { return; }
             replicasets=obj.items; replicasets.forEach( (item) => { item.kind="replicaset";} ); });
         requests.push(replicasetsReq);
     }
     if ( getpods ) {
-        const podsReq   = $.getJSON(pods_path,   (obj) => {
+        const podsReq   = $.getJSON(rootURL + pods_path,   (obj) => {
             if (obj.items == undefined) { return; }
             pods=obj.items; pods.forEach( (item) => { item.kind="pod";} ); });
         requests.push(podsReq);
@@ -1056,10 +1074,7 @@ const createModalText = (type, object, href_content, id, markup) => {
     };
 
     if (getType(object) == "service") {
-        const protocol=window.location.protocol;
-        const hostname=window.location.hostname;
-        const port=window.location.port;
-        const rootURL=`${protocol}://${hostname}:${port}`;
+
         const path = `/api/v1/namespaces/${namespace}/services/${object.metadata.name}/proxy/`;
         const href = `${rootURL}${path}`;
 
@@ -1198,6 +1213,7 @@ const redrawTopMenu = () => {
     //----- Build up namespace dropdown menu:
     const nsMenu = buildNamespaceMenu(namespaces);
 
+     pause_visu.state=false;
     let runningButtonText = createCheckBoxText( "run_or_pause", "Pause", "Pause", pause_visu.state);
 
     let tooltipButtonText = createCheckBoxText( "enable_tooltip", "Enable tooltips", "Enable tooltips", enable_tooltips.state);
@@ -1214,6 +1230,7 @@ const redrawTopMenu = () => {
     $("#top_menu").empty();
     $("#top_menu").append(toplineMenu);
 
+     pause_visu.state=false;
     addCheckBoxHandler("run_or_pause", "Pause", pause_visu,
         (id, label, checkState) => {
             setTimeout(getClusterState, getClusterState_timeout);
@@ -1619,6 +1636,7 @@ const resolveRequests = (nodes, namespaces, deployments, replicasets, pods, serv
          getClusterState_timeout = idle_getClusterState_timeout;
      }
 
+     pause_visu.state=false;
      if (pause_visu.state) {
          debug_log("NO timeout set - stopping");
      } else {
