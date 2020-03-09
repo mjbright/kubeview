@@ -6,6 +6,8 @@ metadata:
   name: flask-app
 spec:
   replicas: 4
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       run: flask-app
