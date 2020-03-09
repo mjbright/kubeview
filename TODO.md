@@ -10,6 +10,8 @@
 # Scenario features:
 
 - Use colour for plain text output to show service upgrades
+- Look at https://github.com/hjacobs/kube-ops-view (TUI) for ideas
+- Show #Pods on a node in node title.
 
 # Boxes (Nodes, Services, Deploys, RS, Pods):
 Title line + smaller lines
