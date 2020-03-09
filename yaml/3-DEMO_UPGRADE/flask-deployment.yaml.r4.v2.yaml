@@ -6,6 +6,13 @@ metadata:
   name: flask-app
 spec:
   replicas: 4
+    # - maxSurge: maximum number of new pods in excess
+    # - maxUnavailable: max no (or %) of pods which can be unavailable during update
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       run: flask-app
