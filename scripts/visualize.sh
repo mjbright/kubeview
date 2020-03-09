@@ -79,7 +79,8 @@ DASHBOARD_HTML=$RUN_DIR/${HOST}_p${PORT}.dashboard.html
 # Take into account ssh tunneling:
 [ -z "$VISU_PORT" ] && VISU_PORT=$PORT
 
-VISU_URL=http://127.0.0.1:$VISU_PORT/static/$HOST.html
+#VISU_URL=http://127.0.0.1:$VISU_PORT/static/$HOST.html
+VISU_URL=http://127.0.0.1:$VISU_PORT/static/${HOST}_p${PORT}.html
 TTYD_URL=http://127.0.0.1:$TTYD_PORT
 
 modify_template() {
@@ -91,7 +92,7 @@ modify_template() {
         -e "s_sourceURL='SOURCEURL'_sourceURL='$SOURCEURL'_" \
         -e "s_CLUSTERNAME='CLUSTERNAME'_CLUSTERNAME='$CLUSTER'_" \
         -e "s_TTYDURL_${TTYD_URL}_" \
-        -e "s_VISUURL_${VISU_URL}_" \
+        -e "s?VISUURL?${VISU_URL}?" \
             $TEMPLATE > $HTML; }
 
     ls -al $HTML
