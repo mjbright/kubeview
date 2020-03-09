@@ -32,8 +32,8 @@ RECREATE_POD
 
 RECREATE_POD() {
     set -x
-        kubectl delete -f kubeview.yaml 
-        kubectl create -f kubeview.yaml 
+        kubectl delete -f yaml/kubeview.yaml 
+        kubectl create -f yaml/kubeview.yaml 
         kubectl get all  -n kube-public
     set +x
 }
