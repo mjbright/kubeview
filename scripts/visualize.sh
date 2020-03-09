@@ -5,8 +5,8 @@
 #PORT=8001
 PORT=8002
 
-#TTYDPORT=9001
-TTYDPORT=9999
+#TTYD_PORT=9001
+TTYD_PORT=9999
 
 #kubectl proxy --www=/Users/mjb/src/git/brendandburns.gcp-live-k8s-visualizer --www-prefix=/my-mountpoint/ --api-prefix=/api/
 
@@ -21,6 +21,14 @@ die() {
     exit 1
 }
 
+set_ldlc_profile() {
+    echo; echo "-- Setting config to connect to ldlc cluster"
+    export KUBECONFIG=~/ldlc.KC
+    export VISU_PORT=8004
+    export PORT=$VISU_PORT
+    export TTYD_PORT=9998
+}
+
 OPTS=""
 
 while [ ! -z "$1" ];do
@@ -28,11 +36,17 @@ while [ ! -z "$1" ];do
         -p)   # Specify other port for experiments:
               shift; PORT=$1; VISU_PORT=$PORT;;
 
+        -ldlc)   # Set profile for LDLC:
+              set_ldlc_profile;;
+
         -L)   # Specify other port for experiments:
               shift; VISU_PORT=$1;;
 
+        -kc)   # Specify kubeconfig to use
+              shift; KUBECONFIG=$1;;
+
         -t)   # Specify ttyd port for embedded terminal:
-              shift; TTYDPORT=$1;;
+              shift; TTYD_PORT=$1;;
 
         -r)   # Access remotely:
               IP=$(ip a | awk '!/127.0.0.1/ && / inet / { FS="/"; $0=$2; print $1; exit(0); }')
@@ -66,7 +80,7 @@ DASHBOARD_HTML=$RUN_DIR/${HOST}_p${PORT}.dashboard.html
 [ -z "$VISU_PORT" ] && VISU_PORT=$PORT
 
 VISU_URL=http://127.0.0.1:$VISU_PORT/static/$HOST.html
-TTYD_URL=http://127.0.0.1:$TTYDPORT
+TTYD_URL=http://127.0.0.1:$TTYD_PORT
 
 modify_template() {
     HTML=$1; shift;
@@ -123,6 +137,7 @@ echo DASHBOARD_URL=$DASHBOARD_URL
 
 cd $RUN_DIR/
 pwd
+[ ! -z "$KUBECONFIG" ] && echo KUBECONFIG=$KUBECONFIG
 set -x
 kubectl proxy $OPTS  --www=. --www-prefix=/static/ --port $PORT
 set +x
